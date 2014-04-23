@@ -7,6 +7,7 @@ Upload dit programma naar de Arduino, en run daarna Processing met de code onder
 // Pin 13 has an LED connected on most Arduino boards.
 // give it a name:
 int led = 13;
+int led_los = 9;
 
 void setup() {
   // initialize the serial communication:
@@ -14,6 +15,7 @@ void setup() {
   
   // initialize the LED as output
   pinMode(led, OUTPUT); 
+  pinMode(led_los, OUTPUT);
 }
 
 void loop() {
@@ -26,9 +28,18 @@ void loop() {
   else {
     digitalWrite(led, LOW);
   }
+  
+  byte brightness;
+  if (analogRead(A0)) {
+    // read the most recent byte (which will be from 0 to 255):
+    brightness = analogRead(A0);
+    // set the brightness of the LED:
+    analogWrite(led_los, brightness); 
+  }
+  
   // wait a bit for the analog-to-digital converter 
   // to stabilize after the last reading:
-  delay(100);
+  delay(20);
 }
 
 /* Processing code:
