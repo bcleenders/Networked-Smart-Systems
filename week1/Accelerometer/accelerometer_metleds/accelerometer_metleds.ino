@@ -27,12 +27,11 @@ void loop()
   mma.getAccXYZ(&x, &y, &z); //get accelerometer readings in normal mode (hi res).
   //getAccXYZ(&x, &y, &z, false); //get accelerometer readings in fast mode (low res).
   Serial.print(x);
-  Serial.print(" ");
+  Serial.print(",");
   Serial.print(y);
-  Serial.print(" ");
-  Serial.print(z);
-  Serial.println();
+  Serial.print(",");
+  Serial.println(z);
  
-  delay(500);
+  delay(2);
 }
 

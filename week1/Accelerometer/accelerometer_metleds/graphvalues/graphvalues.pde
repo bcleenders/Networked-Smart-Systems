@@ -1,12 +1,5 @@
 // Graph Multiple Sensors in Processing
  
-// Takes ASCII-encoded strings from serial port at 9600 baud and graphs them.
-// Expects COMMA-SEPARATED values in the range 0 to 1023, followed by a newline, or newline and carriage return
- 
-// Created 30 Apr 2012
-// by Eric Forman
-// (based on Virtual Color Mixer and Graph examples by Tom Igoe)
- 
 import processing.serial.*;
 Serial myPort;
  
