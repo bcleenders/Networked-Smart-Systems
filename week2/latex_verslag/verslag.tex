@@ -25,15 +25,22 @@ In de tests wordt het effect van drie verschillende factoren onderzocht:
 	\item Datatransmissiesnelheid
 \end{itemize}
 
+De tests moeten uitslag geven welke instellingen zorgen voor de beste communicatie.
+
 \section{Methodologie}
-We defini\"eren de error rate als het aantal niet ontvangen berichten gedeeld door het aantal verstuurde berichten;
+Om "beste" communcatie kwantificeerbaar te maken gebruiken we de error rate. We defini\"eren de error rate als het aantal niet ontvangen berichten gedeeld door het aantal verstuurde berichten;
 
 \begin{math}
 	\text{error rate} = \frac{\text{niet ontvangen}}{\text{verstuurd}} = 1 - \frac{\text{ontvangen}}{\text{verstuurd}} 
 \end{math}
 
+Voor goede communicatie is het van belang dat deze zo laag mogelijk, idealiter nul, is. In dit onderzoek is de error rate de enige eigenschap waarop we de instellingen beoordelen, en laten we andere factoren zoals bandbreedte of opgenomen vermogen achterwege.
 
-Voor goede communicatie is het van belang dat deze zo laag mogelijk, idealiter nul, is.
+\begin{itemize}
+	\item 5 meter
+	\item line of sight
+	\item standaard: 0dBm, freqkanaal 0, 250kbps
+\end{itemize}
 
 \section{Resultaten\&Analyse}
 
@@ -45,6 +52,16 @@ Voor goede communicatie is het van belang dat deze zo laag mogelijk, idealiter n
 	-6 dBm      &  4.8\% 		\\
 	-12 dBm     &  11.1\% 		\\
 	-18 dBm     &  21.9\%
+	\end{tabular}
+\end{table}
+
+\begin{table}[h]
+	\caption{Meetresultaten datatransmissiesnelheid}
+	\begin{tabular}{lllll}
+	Outputpower &  Error rate  	\\
+	250 kbps    &  0.4\% 		\\
+	1 mbps      &  0.6\% 		\\
+	2 mbps      &  0.8\%
 	\end{tabular}
 \end{table}
 
