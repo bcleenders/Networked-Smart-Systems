@@ -91,7 +91,6 @@ void setup(void) {
     //
     // Setup and configure rf radio
     radio.begin();
-    radio.setChannel(111);
     radio.setRetries(0,0);
 
     radio.setDataRate(datarateLevel[0]);
@@ -122,6 +121,7 @@ int success = 0;
 int rounds = 0;
 // Testnumber
 int test = 0;
+int test2 = 0;
 
 void loop(void) {
     //
@@ -158,7 +158,8 @@ void loop(void) {
 
         if (rounds == numberOfPackets) {
             printf("\n--------\n");
-            printf("Data rate: %i (0=250kbps, 1=1mbps 2=2mbps)\n", test);
+           // printf("Power level: %i (0=MAX, 3=MIN)\n", test);
+           // printf("Data rate: %i (0=250kbps, 1=1mbps 2=2mbps)\n", test);
             printf("# packets sent:               %i\n", numberOfPackets);
             printf("# packets correctly received: %i\n", success);
             printf("--------\n");
@@ -172,8 +173,12 @@ void loop(void) {
             radio.startListening();
 
             test = (test+1)%3;
+            test2 = (test2+1)%8; 
             radio.setDataRate(datarateLevel[test]);
             // radio.setPALevel(outputPowerLevel[test]);
+            
+            testChannel = (15*test2);
+            radio.setChannel(testChannel);
         }
 
         delay(10);
@@ -198,8 +203,10 @@ void loop(void) {
 
             if (v == RESETVAL) {
                 test = (test+1)%3;
-                radio.setDataRate(datarateLevel[test]);
+                test2 = (test2+1)%8;
+                //radio.setDataRate(datarateLevel[test]);
                 // radio.setPALevel(outputPowerLevel[test]);
+                radio.setChannel(test2);
                 printf("Finished test; moving to next!\n");
             }
 
