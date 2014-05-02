@@ -158,7 +158,7 @@ void loop(void) {
 
         if (rounds == numberOfPackets) {
             printf("\n--------\n");
-            printf("Power level: %i (0=MAX 4=MIN)\n", outputPowerLevel[test]);
+            printf("Power level: %i (0=MIN 3=MAX)\n", outputPowerLevel[test]);
             printf("# packets sent:               %i\n", numberOfPackets);
             printf("# packets correctly received: %i\n", success);
             printf("--------\n");
