@@ -176,7 +176,7 @@ void loop(void) {
 
             test = (test+1)%3;
             test2 = (test2+1)%8; 
-            radio.setDataRate(datarateLevel[test]);
+            //radio.setDataRate(datarateLevel[test]);
             // radio.setPALevel(outputPowerLevel[test]);
             
             testChannel = (15*test2);
