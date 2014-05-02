@@ -1,0 +1,53 @@
+\documentclass[a4paper,10pt]{article}
+\usepackage[utf8]{inputenc}
+\usepackage{amstext}
+
+%opening
+\title{Radio communicatie met Arduino}
+\author{Patrick van Looy \& Bram Leenders}
+
+\begin{document}
+
+\maketitle
+
+\section{Inleiding}
+Met behulp van radiocommunicatie kunnen apparaten, zoals computers, met elkaar communiceren zonder een fysieke verbinding daarvoor nodig te hebben. Dit leent zich voor het makkelijk opzetten van (grote) netwerken, omdat de verbindingen zonder planning vooraf kunnen worden opgezet. Bij bijvoorbeeld Smart Dust kunnen de agents na de verspreiding zelf connecties opzetten en hier gebruik van maken.
+
+Een nadeel van draadloze communicatie, is dat er vaak meer last is van storing dan wanneer er een fysieke verbinding (i.e. een kabel) aanwezig is. Doordat de communicatie niet "afgesloten" van de buitenwereld plaats vind, kunnen er externe storingszenders zijn. Voorbeelden van storingen zijn bijvoorbeeld andere agents die communiceren, obstakels die een signaal blokkeren of weerkaatsing van eerder gestuurde berichten.
+
+\section{Probleemstelling}
+In dit onderzoek wordt gekeken naar verschillende modi waarop radiocommunicatie met Arduino's gedaan kan worden. Het doel is om erachter te komen welke modus het minst last heeft van storing en (dus) de laagste error rate heeft.
+
+In de tests wordt het effect van drie verschillende factoren onderzocht:
+\begin{itemize}
+	\item Het frequentiekanaal
+	\item De outputpower van verzonden pakketten
+	\item Datatransmissiesnelheid
+\end{itemize}
+
+\section{Methodologie}
+We defini\"eren de error rate als het aantal niet ontvangen berichten gedeeld door het aantal verstuurde berichten;
+
+\begin{math}
+	\text{error rate} = \frac{\text{niet ontvangen}}{\text{verstuurd}} = 1 - \frac{\text{ontvangen}}{\text{verstuurd}} 
+\end{math}
+
+
+Voor goede communicatie is het van belang dat deze zo laag mogelijk, idealiter nul, is.
+
+\section{Resultaten\&Analyse}
+
+\begin{table}[h]
+	\caption{Meetresultaten outputpower}
+	\begin{tabular}{lllll}
+	Outputpower &  Error rate  	\\
+	0 dBm       &  0.4\% 		\\
+	-6 dBm      &  4.8\% 		\\
+	-12 dBm     &  11.1\% 		\\
+	-18 dBm     &  21.9\%
+	\end{tabular}
+\end{table}
+
+\section{Conclusie}
+
+\end{document}
