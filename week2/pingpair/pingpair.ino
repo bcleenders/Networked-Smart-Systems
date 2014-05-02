@@ -122,6 +122,7 @@ int rounds = 0;
 // Testnumber
 int test = 0;
 int test2 = 0;
+int testChannel = 0;
 
 void loop(void) {
     //
@@ -160,6 +161,7 @@ void loop(void) {
             printf("\n--------\n");
            // printf("Power level: %i (0=MAX, 3=MIN)\n", test);
            // printf("Data rate: %i (0=250kbps, 1=1mbps 2=2mbps)\n", test);
+            printf("Channel: %i\n", testChannel);
             printf("# packets sent:               %i\n", numberOfPackets);
             printf("# packets correctly received: %i\n", success);
             printf("--------\n");
