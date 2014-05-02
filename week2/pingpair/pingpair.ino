@@ -60,16 +60,14 @@ typedef enum { role_ping_out = 1, role_pong_back } role_e;
 // The debug-friendly names of those roles
 const char* role_friendly_name[] = { "invalid", "Ping out", "Pong back"};
 
-const rf24_pa_dbm_e levels[] = {RF24_PA_MAX, RF24_PA_HIGH, RF24_PA_LOW, RF24_PA_MIN};
+const rf24_pa_dbm_e outputPowerLevel[] = {RF24_PA_MAX, RF24_PA_HIGH, RF24_PA_LOW, RF24_PA_MIN};
+const rf24_datarate_e datarateLevel[] = {RF24_250KBPS, RF24_1MBPS, RF24_2MBPS};
+
 
 // The role of the current running sketch
 role_e role;
 
 void setup(void) {
-    //
-    // Role
-    //
-
     // set up the role pin
     pinMode(role_pin, INPUT);
     digitalWrite(role_pin,HIGH);
@@ -94,8 +92,11 @@ void setup(void) {
     // Setup and configure rf radio
     radio.begin();
     radio.setChannel(111);
-    // Disable resending of packages
     radio.setRetries(0,0);
+
+    radio.setDataRate(datarateLevel[0]);
+    radio.setPALevel(outputPowerLevel[0]);
+    radio.setChannel(0);
 
     // optionally, reduce the payload size.  seems to
     // improve reliability
@@ -143,7 +144,7 @@ void loop(void) {
 
         // Describe the results
         if ( timeout ) {
-            printf(".");
+            // printf(".");
         }
         else {
             int receivedValue;
@@ -156,8 +157,8 @@ void loop(void) {
         }
 
         if (rounds == numberOfPackets) {
-            printf("--------\n");
-            printf("Power level: %i\n", levels[test]);
+            printf("\n--------\n");
+            printf("Power level: %i (0=MAX 4=MIN)\n", outputPowerLevel[test]);
             printf("# packets sent:               %i\n", numberOfPackets);
             printf("# packets correctly received: %i\n", success);
             printf("--------\n");
@@ -166,12 +167,12 @@ void loop(void) {
             rounds = 0;
 
             radio.stopListening();
-            radio.setPALevel(levels[0]); // Max power; increase chance of succesfully receiving it
+            radio.setPALevel(outputPowerLevel[0]); // Max power; increase chance of succesfully receiving it
             bool ok = radio.write( &RESETVAL, sizeof(int) ); // Pray this will be received
             radio.startListening();
 
             test = (test+1)%4;
-            radio.setPALevel(levels[test]);
+            radio.setPALevel(outputPowerLevel[test]);
         }
 
         delay(10);
@@ -196,7 +197,7 @@ void loop(void) {
 
             if (v == RESETVAL) {
                 test = (test+1)%4;
-                radio.setPALevel(levels[test]);
+                radio.setPALevel(outputPowerLevel[test]);
                 printf("Finished test; moving to next!\n");
             }
 
