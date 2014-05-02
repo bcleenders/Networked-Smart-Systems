@@ -174,7 +174,7 @@ void loop(void) {
             bool ok = radio.write( &RESETVAL, sizeof(int) ); // Pray this will be received
             radio.startListening();
 
-            test = (test+1)%3;
+            //test = (test+1)%3;
             test2 = (test2+1)%8; 
             //radio.setDataRate(datarateLevel[test]);
             // radio.setPALevel(outputPowerLevel[test]);
@@ -204,11 +204,11 @@ void loop(void) {
             }
 
             if (v == RESETVAL) {
-                test = (test+1)%3;
+                //test = (test+1)%3;
                 test2 = (test2+1)%8;
                 //radio.setDataRate(datarateLevel[test]);
                 // radio.setPALevel(outputPowerLevel[test]);
-                radio.setChannel(test2);
+                radio.setChannel(15*test2);
                 printf("Finished test; moving to next!\n");
             }
 
