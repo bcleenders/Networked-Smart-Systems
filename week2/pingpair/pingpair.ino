@@ -143,7 +143,7 @@ void loop(void) {
 
         // Describe the results
         if ( timeout ) {
-            printf("Failed, response timed out.\n\r");
+            printf(".");
         }
         else {
             int receivedValue;
@@ -156,11 +156,11 @@ void loop(void) {
         }
 
         if (rounds == numberOfPackets) {
-            printf("--------");
-            printf("Power level: %i", levels[test]);
-            printf("# packets sent:               %i", numberOfPackets);
+            printf("--------\n");
+            printf("Power level: %i\n", levels[test]);
+            printf("# packets sent:               %i\n", numberOfPackets);
             printf("# packets correctly received: %i\n", success);
-            printf("--------");
+            printf("--------\n");
             // Reset counters
             success = 0;
             rounds = 0;
@@ -197,6 +197,7 @@ void loop(void) {
             if (v == RESETVAL) {
                 test = (test+1)%4;
                 radio.setPALevel(levels[test]);
+                printf("Finished test; moving to next!\n");
             }
 
             radio.stopListening();
