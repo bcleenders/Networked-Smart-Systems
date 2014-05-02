@@ -40,8 +40,9 @@ const int role_pin = 7;
 // Radio pipe addresses for the 2 nodes to communicate.
 const uint64_t pipes[2] = { 0x123456789aLL, 0x987654321bLL };
 
-const int sendValue = 170;
+const int sendValue = 170; // binary; 10101010
 const int numberOfPackets = 1000;
+const int RESETVAL = 42;
 
 //
 // Role management
@@ -58,6 +59,8 @@ typedef enum { role_ping_out = 1, role_pong_back } role_e;
 
 // The debug-friendly names of those roles
 const char* role_friendly_name[] = { "invalid", "Ping out", "Pong back"};
+
+const rf24_pa_dbm_e levels[] = {RF24_PA_MAX, RF24_PA_HIGH, RF24_PA_LOW, RF24_PA_MIN};
 
 // The role of the current running sketch
 role_e role;
@@ -116,6 +119,8 @@ void setup(void) {
 int success = 0;
 // Rounds of communication so far; 0 <= rounds <= numberOfPackets
 int rounds = 0;
+// Testnumber
+int test = 0;
 
 void loop(void) {
     //
@@ -141,7 +146,6 @@ void loop(void) {
             printf("Failed, response timed out.\n\r");
         }
         else {
-            // Grab the response, compare, and send to debugging spew
             int receivedValue;
             radio.read( &receivedValue, sizeof(int) );
 
@@ -152,13 +156,24 @@ void loop(void) {
         }
 
         if (rounds == numberOfPackets) {
+            printf("--------");
+            printf("Power level: %i", levels[test]);
             printf("# packets sent:               %i", numberOfPackets);
             printf("# packets correctly received: %i\n", success);
+            printf("--------");
+            // Reset counters
             success = 0;
             rounds = 0;
+
+            radio.stopListening();
+            radio.setPALevel(levels[0]); // Max power; increase chance of succesfully receiving it
+            bool ok = radio.write( &RESETVAL, sizeof(int) ); // Pray this will be received
+            radio.startListening();
+
+            test = (test+1)%4;
+            radio.setPALevel(levels[test]);
         }
 
-        // Try again 1s later
         delay(10);
     }
 
@@ -166,11 +181,9 @@ void loop(void) {
     // Pong back role.  Receive each packet, dump it out, and send it back
     //
 
-    if ( role == role_pong_back )
-    {
+    if ( role == role_pong_back ) {
         // if there is data ready
-        if ( radio.available() )
-        {
+        if ( radio.available() ) {
             // Dump the payloads until we've gotten everything
             int v;
             bool done = false;
@@ -179,6 +192,11 @@ void loop(void) {
                 done = radio.read( &v, sizeof(int) );
 
                 delay(10);
+            }
+
+            if (v == RESETVAL) {
+                test = (test+1)%4;
+                radio.setPALevel(levels[test]);
             }
 
             radio.stopListening();
