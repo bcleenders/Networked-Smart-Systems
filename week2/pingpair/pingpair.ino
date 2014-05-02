@@ -40,6 +40,9 @@ const int role_pin = 7;
 // Radio pipe addresses for the 2 nodes to communicate.
 const uint64_t pipes[2] = { 0x123456789aLL, 0x987654321bLL };
 
+const int sendValue = 170;
+const int numberOfPackets = 1000;
+
 //
 // Role management
 //
@@ -92,8 +95,8 @@ void setup(void) {
     // Pas ook het kanaal aan waar de radio op functioneert tijdens de test, dit om te voorkomen dat je je medestudenten stoort.
     radio.setChannel(111);
 
-    // optionally, increase the delay between retries & # of retries
-    radio.setRetries(15,15);
+    // Disable resending of packages
+    radio.setRetries(0,0);
 
     // optionally, reduce the payload size.  seems to
     // improve reliability
@@ -132,26 +135,23 @@ void setup(void) {
     radio.printDetails();
 }
 
-void loop(void)
-{
+
+// Number of succesfully received packages; 0 <= success <= rounds
+int success = 0;
+// Rounds of communication so far; 0 <= rounds <= numberOfPackets
+int rounds = 0;
+
+void loop(void) {
     //
     // Ping out role.  Repeatedly send the current time
     //
 
-    if (role == role_ping_out)
-    {
+    if (role == role_ping_out) {
         // First, stop listening so we can talk.
         radio.stopListening();
 
-        // Take the time, and send it.  This will block until complete
-        unsigned long time = millis();
-        printf("Now sending %lu...",time);
-        bool ok = radio.write( &time, sizeof(unsigned long) );
-        
-        if (ok)
-            printf("ok...");
-        else
-            printf("failed.\n\r");
+        // Send our value
+        bool ok = radio.write( &sendValue, sizeof(int) );
 
         // Now, continue listening
         radio.startListening();
@@ -160,26 +160,33 @@ void loop(void)
         unsigned long started_waiting_at = millis();
         bool timeout = false;
         while ( ! radio.available() && ! timeout )
-            if (millis() - started_waiting_at > 200 )
+            if (millis() - started_waiting_at > 100 )
                 timeout = true;
 
         // Describe the results
-        if ( timeout )
-        {
+        if ( timeout ) {
             printf("Failed, response timed out.\n\r");
         }
-        else
-        {
+        else {
             // Grab the response, compare, and send to debugging spew
-            unsigned long got_time;
-            radio.read( &got_time, sizeof(unsigned long) );
+            int receivedValue;
+            radio.read( &receivedValue, sizeof(int) );
 
-            // Spew it
-            printf("Got response %lu, round-trip delay: %lu\n\r",got_time,millis()-got_time);
+            // Successfull round trip of our value! Increase our success counter.
+            if(receivedValue == sendValue) {
+                success++;
+            }
+        }
+
+        rounds++;
+
+        if (rounds == numberOfPackets) {
+            printf("# packets sent:               %i", numberOfPackets);
+            printf("# packets correctly received: %i", success);
         }
 
         // Try again 1s later
-        delay(1000);
+        delay(10);
     }
 
     //
@@ -192,27 +199,25 @@ void loop(void)
         if ( radio.available() )
         {
             // Dump the payloads until we've gotten everything
-            unsigned long got_time;
+            int v;
             bool done = false;
-            while (!done)
-            {
+            while (!done) {
                 // Fetch the payload, and see if this was the last one.
-                done = radio.read( &got_time, sizeof(unsigned long) );
+                done = radio.read( &v, sizeof(int) );
 
                 // Spew it
                 printf("Got payload %lu...",got_time);
 
-        // Delay just a little bit to let the other unit
-        // make the transition to receiver
-        delay(20);
+                // Delay just a little bit to let the other unit
+                // make the transition to receiver
+                delay(10);
             }
 
             // First, stop listening so we can talk
             radio.stopListening();
 
             // Send the final one back.
-            radio.write( &got_time, sizeof(unsigned long) );
-            printf("Sent response.\n\r");
+            radio.write( &v, sizeof(int) );
 
             // Now, resume listening so we catch the next packets.
             radio.startListening();
