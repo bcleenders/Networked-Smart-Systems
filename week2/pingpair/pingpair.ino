@@ -89,12 +89,8 @@ void setup(void) {
 
     //
     // Setup and configure rf radio
-    //
-
     radio.begin();
-    // Pas ook het kanaal aan waar de radio op functioneert tijdens de test, dit om te voorkomen dat je je medestudenten stoort.
     radio.setChannel(111);
-
     // Disable resending of packages
     radio.setRetries(0,0);
 
@@ -102,36 +98,16 @@ void setup(void) {
     // improve reliability
     radio.setPayloadSize(8);
 
-    //
-    // Open pipes to other nodes for communication
-    //
-
-    // This simple sketch opens two pipes for these two nodes to communicate
-    // back and forth.
-    // Open 'our' pipe for writing
-    // Open the 'other' pipe for reading, in position #1 (we can have up to 5 pipes open for reading)
-
-    if ( role == role_ping_out )
-    {
+    if ( role == role_ping_out ) {
         radio.openWritingPipe(pipes[0]);
         radio.openReadingPipe(1,pipes[1]);
     }
-    else
-    {
+    else {
         radio.openWritingPipe(pipes[1]);
         radio.openReadingPipe(1,pipes[0]);
     }
 
-    //
-    // Start listening
-    //
-
     radio.startListening();
-
-    //
-    // Dump the configuration of the rf unit for debugging
-    //
-
     radio.printDetails();
 }
 
@@ -147,20 +123,17 @@ void loop(void) {
     //
 
     if (role == role_ping_out) {
-        // First, stop listening so we can talk.
+        rounds++;
+
         radio.stopListening();
-
-        // Send our value
         bool ok = radio.write( &sendValue, sizeof(int) );
-
-        // Now, continue listening
         radio.startListening();
 
         // Wait here until we get a response, or timeout (250ms)
         unsigned long started_waiting_at = millis();
         bool timeout = false;
         while ( ! radio.available() && ! timeout )
-            if (millis() - started_waiting_at > 100 )
+            if (millis() - started_waiting_at > 50 )
                 timeout = true;
 
         // Describe the results
@@ -178,11 +151,11 @@ void loop(void) {
             }
         }
 
-        rounds++;
-
         if (rounds == numberOfPackets) {
             printf("# packets sent:               %i", numberOfPackets);
             printf("# packets correctly received: %i", success);
+            success = 0;
+            rounds = 0;
         }
 
         // Try again 1s later
@@ -205,21 +178,11 @@ void loop(void) {
                 // Fetch the payload, and see if this was the last one.
                 done = radio.read( &v, sizeof(int) );
 
-                // Spew it
-                printf("Got payload %lu...",got_time);
-
-                // Delay just a little bit to let the other unit
-                // make the transition to receiver
                 delay(10);
             }
 
-            // First, stop listening so we can talk
             radio.stopListening();
-
-            // Send the final one back.
             radio.write( &v, sizeof(int) );
-
-            // Now, resume listening so we catch the next packets.
             radio.startListening();
         }
     }
