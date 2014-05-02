@@ -133,7 +133,7 @@ void loop(void) {
         unsigned long started_waiting_at = millis();
         bool timeout = false;
         while ( ! radio.available() && ! timeout )
-            if (millis() - started_waiting_at > 50 )
+            if (millis() - started_waiting_at > 250 )
                 timeout = true;
 
         // Describe the results
@@ -153,7 +153,7 @@ void loop(void) {
 
         if (rounds == numberOfPackets) {
             printf("# packets sent:               %i", numberOfPackets);
-            printf("# packets correctly received: %i", success);
+            printf("# packets correctly received: %i\n", success);
             success = 0;
             rounds = 0;
         }
