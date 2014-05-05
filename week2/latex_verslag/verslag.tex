@@ -1,6 +1,15 @@
 \documentclass[a4paper,10pt]{article}
 \usepackage[utf8]{inputenc}
 \usepackage{amstext}
+\usepackage{listings}
+\usepackage{graphicx}
+\usepackage[T1]{fontenc}
+\usepackage[utf8]{inputenc}
+\usepackage[font=small,labelfont=bf]{caption}
+\usepackage{float}
+
+\DeclareCaptionLabelFormat{andtable}{#1~#2  \&  \tablename~\thetable}
+
 
 %opening
 \title{Radio communicatie met Arduino}
@@ -20,51 +29,108 @@ In dit onderzoek wordt gekeken naar verschillende modi waarop radiocommunicatie 
 
 In de tests wordt het effect van drie verschillende factoren onderzocht:
 \begin{itemize}
-	\item Het frequentiekanaal
-	\item De outputpower van verzonden pakketten
-	\item Datatransmissiesnelheid
+    \item Het frequentiekanaal
+    \item De outputpower van verzonden pakketten
+    \item Datatransmissiesnelheid
 \end{itemize}
 
 De tests moeten uitslag geven welke instellingen zorgen voor de beste communicatie.
 
 \section{Methodologie}
-Om "beste" communcatie kwantificeerbaar te maken gebruiken we de error rate. We defini\"eren de error rate als het aantal niet ontvangen berichten gedeeld door het aantal verstuurde berichten;
+Om "beste" communcatie kwantificeerbaar te maken gebruiken we de error rate. We defini\"eren de error rate als het aantal niet of incorrect ontvangen berichten gedeeld door het aantal verstuurde berichten;
 
 \begin{math}
-	\text{error rate} = \frac{\text{niet ontvangen}}{\text{verstuurd}} = 1 - \frac{\text{ontvangen}}{\text{verstuurd}} 
+    \text{error rate} = \frac{\text{niet ontvangen}}{\text{verstuurd}} = 1 - \frac{\text{ontvangen}}{\text{verstuurd}} 
 \end{math}
 
 Voor goede communicatie is het van belang dat deze zo laag mogelijk, idealiter nul, is. In dit onderzoek is de error rate de enige eigenschap waarop we de instellingen beoordelen, en laten we andere factoren zoals bandbreedte of opgenomen vermogen achterwege.
 
-\begin{itemize}
-	\item 5 meter
-	\item line of sight
-	\item standaard: 0dBm, freqkanaal 0, 250kbps
-\end{itemize}
+In de testopstelling is gebruik gemaakt van twee Arduino Uno's, de Nordic nrf24l01+ radio en de RF42 library. Tenzij expliciet anders vermeldt gebruiken de radio's frequentiekanaal 0, een transmissionspeed van 250kbps en de hoogste outputpower (0 dBm). De afstand tussen beide radio's is vijf meter en er is sprake van een line of sight (geen blokkerende objecten). De tests zijn uitgevoerd in een ruimte met andere elektrische aparatuur die ook van radiocommunicatie gebruik maakte.
+
+Tijdens de test zendt een Arduino duizend maal een pakket; wanneer de andere Arduino het pakket ontvangt stuurt deze hem terug. Wanneer het pakket voor de tweede maal ontvangen wordt, telt dat als \'e\'en succesvol ontvangen pakket. Er wordt dus naar een volledige roundtrip gekeken. Beide radio zenders gebruiken telkens dezelfde instellingen, en de timeout tijd is zeer ruim gekozen om dit geen beperking te laten zijn.
 
 \section{Resultaten\&Analyse}
+Deze sectie geeft de resultaten van de uitgevoerde tests en toelichting daarbij.
 
-\begin{table}[h]
-	\caption{Meetresultaten outputpower}
-	\begin{tabular}{lllll}
-	Outputpower &  Error rate  	\\
-	0 dBm       &  0.4\% 		\\
-	-6 dBm      &  4.8\% 		\\
-	-12 dBm     &  11.1\% 		\\
-	-18 dBm     &  21.9\%
-	\end{tabular}
-\end{table}
+\subsection{Outputpower}
+In de eerste serie tests is gekeken naar het effect van verandering van de output power op de error rate. Hierbij is de hypothese dat een sterker output signaal bij de zender een sterker input signaal bij de ontvanger geeft. Dus, dat een sterker input signaal een lagere error rate geeft.
 
-\begin{table}[h]
-	\caption{Meetresultaten datatransmissiesnelheid}
-	\begin{tabular}{lllll}
-	Outputpower &  Error rate  	\\
-	250 kbps    &  0.4\% 		\\
-	1 mbps      &  0.6\% 		\\
-	2 mbps      &  0.8\%
-	\end{tabular}
-\end{table}
+\begin{figure}[h!]
+    \begin{minipage}{\textwidth}
+        \begin{minipage}{0.49\textwidth}
+            \centering
+            \begin{tabular}{cc}\hline
+                Outputpower &  Error rate   \\ \hline
+                0 dBm       &  0.4\%        \\
+                -6 dBm      &  4.8\%        \\
+                -12 dBm     &  11.1\%       \\
+                -18 dBm     &  21.9\%	\\ \hline
+            \end{tabular}
+        \end{minipage}
+        \hfill
+        \begin{minipage}{0.49\textwidth}
+            \centering
+            \includegraphics[width=0.9\textwidth]{outputpower.png}
+        \end{minipage}
+        \caption{Error rate bij verschillende output sterktes.}
+    \end{minipage}
+\end{figure}
+In de resultaten is duidelijk terug te zien dat deze hypothese klopt: een sterker output signaal geeft een lagere error rate. Er is een zeer significant verschil; een toename van factor $64$ in vermogen geeft een error rate die ongeveer een factor $55$ lager is.
+
+\subsection{Datatransmissiesnelheid}
+\begin{figure}[h!]
+    \begin{minipage}{\textwidth}
+        \begin{minipage}{0.49\textwidth}
+            \centering
+            \begin{tabular}{cc} \hline
+                Outputpower &  Error rate   \\ \hline
+                250 kbps    &  0.4\%        \\
+                1 mbps      &  0.6\%        \\
+                2 mbps      &  0.8\%        \\ \hline
+            \end{tabular}
+        \end{minipage}
+        \hfill
+        \begin{minipage}{0.49\textwidth}
+            \centering
+            \includegraphics[width=0.9\textwidth]{bandbreedte.png}
+        \end{minipage}
+        \caption{Error rate bij verschillende datatransmissie snelheden.}
+    \end{minipage}
+\end{figure}
+Hierbij zien we dat de error rate slechts weinig verandert; hoewel het relatieve verschil vrij groot is (factor twee) blijft de error rate erg laag. Afgaande op deze resultaten kunnen we dus stellen dat een lage datatransmissiesnelheid de error rate positief be\"invloed.
+
+Echter, omdat de error rate in alle gevallen erg laag was, raden we aan om eerst uitvoeriger te testen binnen opstellingen die een hogere error rate hebben.
+
+\subsection{Frequentiekanaal}
+\begin{figure}[h!]
+    \begin{minipage}{\textwidth}
+        \begin{minipage}{0.49\textwidth}
+            \centering
+            \begin{tabular}{cc} \hline
+                Outputpower &  Error rate           \\ \hline
+                Frequentiekanaal    &  Error rate   \\ \hline
+                0                   &  4.7\%        \\
+                15                  &  2.4\%        \\
+                30                  &  10.6\%       \\
+                45                  &  21.1\%       \\
+                60                  &  24.6\%       \\
+                75                  &  13.6\%       \\
+                90                  &  1.6\%        \\
+                105                 &  1.3\%        \\ \hline
+            \end{tabular}
+        \end{minipage}
+        \hfill
+        \begin{minipage}{0.49\textwidth}
+            \centering
+            \includegraphics[width=0.9\textwidth]{frequentiekanaal.png}
+        \end{minipage}
+        \caption{Error rate bij verschillende frequentiekanalen.}
+    \end{minipage}
+\end{figure}
 
 \section{Conclusie}
+
+\appendix{Code}
+\input{code_formatted}
 
 \end{document}
