@@ -49,8 +49,10 @@ In de testopstelling is gebruik gemaakt van twee Arduino Uno's, de Nordic nrf24l
 
 Tijdens de test zendt een Arduino duizend maal een pakket; wanneer de andere Arduino het pakket ontvangt stuurt deze hem terug. Wanneer het pakket voor de tweede maal ontvangen wordt, telt dat als \'e\'en succesvol ontvangen pakket. Er wordt dus naar een volledige roundtrip gekeken. Beide radio zenders gebruiken telkens dezelfde instellingen, en de timeout tijd is zeer ruim gekozen om dit geen beperking te laten zijn.
 
+De gebruikte code is te zien in Appendix~\ref{sec:code}.
+
 \section{Resultaten\&Analyse}
-Deze sectie geeft de resultaten van de uitgevoerde tests en toelichting daarbij.
+Deze sectie geeft de resultaten van de uitgevoerde tests en toelichting daarbij. Er zijn drie factoren onderzocht; de outputpower, het frequentiekanaal en de datatransmissiesnelheid.
 
 \subsection{Outputpower}
 In de eerste serie tests is gekeken naar het effect van verandering van de output power op de error rate. Hierbij is de hypothese dat een sterker output signaal bij de zender een sterker input signaal bij de ontvanger geeft. Dus, dat een sterker input signaal een lagere error rate geeft.
@@ -83,10 +85,10 @@ In de resultaten is duidelijk terug te zien dat deze hypothese klopt: een sterke
         \begin{minipage}{0.49\textwidth}
             \centering
             \begin{tabular}{cc} \hline
-                Outputpower &  Error rate   \\ \hline
-                250 kbps    &  0.4\%        \\
-                1 mbps      &  0.6\%        \\
-                2 mbps      &  0.8\%        \\ \hline
+                Datatransmissiesnelheid &  Error rate   \\ \hline
+                250 kbps                &  0.4\%        \\
+                1 mbps                  &  0.6\%        \\
+                2 mbps                  &  0.8\%        \\ \hline
             \end{tabular}
         \end{minipage}
         \hfill
@@ -102,12 +104,17 @@ Hierbij zien we dat de error rate slechts weinig verandert; hoewel het relatieve
 Echter, omdat de error rate in alle gevallen erg laag was, raden we aan om eerst uitvoeriger te testen binnen opstellingen die een hogere error rate hebben.
 
 \subsection{Frequentiekanaal}
+Zoals in de introductie al kort genoemd is, kunnen radiozenders elkaar storen omdat ze hetzelfde medium gebruiken. Om dit te voorkomen kunnen zenders verschillende frequenties gebruiken, waardoor ze elkaar niet of minder storen. In de gebruikte testruimte zijn mogelijke stoorzenders onder andere omringende Arduino's en laptops die WiFi gebruiken. Omdat de frequentieband van de Arduino's (2.4 GHz) gedeeld wordt met WiFi, verwachten we dat de frequenties rond WiFi erg veel last hiervan hebben.
+
+De testresultaten ondersteunen deze hypothese: er is duidelijk zichtbaar dat frequenties dicht bij de 2.4 GHz erg veel storing (bijna 25\%) hebben, terwijl frequenties die daar verder vanaf liggen vrijwel geen storing (1.3\% error rate) hebben. Wat verder opvalt, is dat niet alleen het precieze WiFi frequentiekanaal gestoord worden maar de frequentiekanalen ernaast ook. Het is dus zaak om een frequentiekanaal te zoeken dat zo ver mogelijk van gebruikte kanalen af ligt.
+
+Figuur~\ref{fig:freqkanaal_table} toont een overzicht van de meetresultaten van de geteste frequentiekanalen.
+
 \begin{figure}[h!]
     \begin{minipage}{\textwidth}
         \begin{minipage}{0.49\textwidth}
             \centering
             \begin{tabular}{cc} \hline
-                Outputpower &  Error rate           \\ \hline
                 Frequentiekanaal    &  Error rate   \\ \hline
                 0                   &  4.7\%        \\
                 15                  &  2.4\%        \\
@@ -125,12 +132,21 @@ Echter, omdat de error rate in alle gevallen erg laag was, raden we aan om eerst
             \includegraphics[width=0.9\textwidth]{frequentiekanaal.png}
         \end{minipage}
         \caption{Error rate bij verschillende frequentiekanalen.}
+        \label{fig:freqkanaal_table}
     \end{minipage}
 \end{figure}
 
 \section{Conclusie}
+Uit de tests is gebleken dat de laagste error rate behaald wordt bij een sterk outputsignaal met lage datatransmissiesnelheid, op een frequentiekanaal dat niet door andere zenders gebruikt wordt.
 
-\appendix{Code}
+Natuurlijk is voor het opzetten van een sensornetwerk meer nodig dan alleen een lage error rate. Zo kan een hogere datatransmissiesnelheid de voorkeur hebben boven een lage, ookal heeft deze een hogere error rate. Dit omdat de bandbreedte van 2mbps acht keer hoger is dan 500kbps, dus voor grote hoeveelheden data is het energiezuiniger en sneller om op hoge snelheid te zenden.
+
+Voor de outputpower geldt hetzelfde; hoewel de error rate lager is, verbruikt de zender ook veel meer stroom (11,3 mA bij 0dBm vs. 7 mA bij -18dBm). Ook hierbij kan dus gekozen worden voor een setting met hogere error rate om stroom te bezuinigen.
+
+\newpage
+\appendix
+\section{Bijlage 1 - Code}
+\label{sec:code}
 \input{code_formatted}
 
 \end{document}
