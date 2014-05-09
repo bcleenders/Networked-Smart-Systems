@@ -109,42 +109,33 @@ void setup(void) {
     // improve reliability
     radio.setPayloadSize(8);
 
-    if ( role == role_ping_out ) {
-        radio.openWritingPipe(pipes[0]);
-        radio.openReadingPipe(1,pipes[1]);
+    if ( role == role_ping_out ) { // Sender
+        radio.openWritingPipe(pipes[1]); // Write to repeater
+        radio.openReadingPipe(1,pipes[1]); // Read from repeater
     }
-    else if (role == role_ping_repeat){
-        
-    }
-    else {
-        radio.openWritingPipe(pipes[1]);
+    else if (role == role_ping_repeat){ // Repeater
+        // radio.openWritingPipe(pipes[0]);
         radio.openReadingPipe(1,pipes[0]);
+        
+        // radio.openWritingPipe(pipes[2]);
+        radio.openReadingPipe(2,pipes[2]);
+    }
+    else { // Receiver
+        radio.openWritingPipe(pipes[1]);
+        radio.openReadingPipe(1,pipes[1]);
     }
 
     radio.startListening();
     radio.printDetails();
 }
 
-
-// Number of succesfully received packages; 0 <= success <= rounds
-int success = 0;
-// Rounds of communication so far; 0 <= rounds <= numberOfPackets
-int rounds = 0;
-// Testnumber
-int test = 0;
-int test2 = 0;
-int testChannel = 0;
+// Bevat het nummer dat nu gestuurd moet worden
+int currentNumber = 1;
 
 void loop(void) {
-    //
-    // Ping out role.  Repeatedly send the current time
-    //
-
     if (role == role_ping_out) {
-        rounds++;
-
         radio.stopListening();
-        bool ok = radio.write( &sendValue, sizeof(int) );
+        bool ok = radio.write( &currentNumber, sizeof(int) );
         radio.startListening();
 
         // Wait here until we get a response, or timeout (250ms)
@@ -156,72 +147,50 @@ void loop(void) {
 
         // Describe the results
         if ( timeout ) {
-            // printf(".");
+          // Zend opnieuw!
+          // currentNumber wordt opnieuw verzonden in de volgende iteratie van loop()
+          printf("Timeout occurred at sender; no ACK received. Packet #:");
+          printf(currentNumber);
+          printf("\n");
         }
         else {
             int receivedValue;
             radio.read( &receivedValue, sizeof(int) );
 
-            // Successfull round trip of our value! Increase our success counter.
-            if(receivedValue == sendValue) {
-                success++;
+            // ACK our value! Increase our success counter.
+            if(receivedValue == currentNumber) {
+                // Success!
+                currentNumber++;
+            }
+            else {
+              // Received double ACK
+              printf("Received double ACK. Packet #:");
+              printf(currentNumber);
+              printf("\n");
             }
         }
 
-        if (rounds == numberOfPackets) {
-            printf("\n--------\n");
-           // printf("Power level: %i (0=MAX, 3=MIN)\n", test);
-           // printf("Data rate: %i (0=250kbps, 1=1mbps 2=2mbps)\n", test);
-            printf("Channel: %i\n", testChannel);
-            printf("# packets sent:               %i\n", numberOfPackets);
-            printf("# packets correctly received: %i\n", success);
-            printf("--------\n");
-            // Reset counters
-            success = 0;
-            rounds = 0;
-
-            radio.stopListening();
-            radio.setPALevel(outputPowerLevel[0]); // Max power; increase chance of succesfully receiving it
-            bool ok = radio.write( &RESETVAL, sizeof(int) ); // Pray this will be received
-            radio.startListening();
-
-            //test = (test+1)%3;
-            test2 = (test2+1)%8; 
-            //radio.setDataRate(datarateLevel[test]);
-            // radio.setPALevel(outputPowerLevel[test]);
-            
-            testChannel = (15*test2);
-            radio.setChannel(testChannel);
-        }
-
-        delay(10);
+        delay(50);
     }
 
-    //
-    // Pong back role.  Receive each packet, dump it out, and send it back
-    //
+
 
     if ( role == role_pong_back ) {
         // if there is data ready
         if ( radio.available() ) {
+            
             // Dump the payloads until we've gotten everything
-            int v;
-            bool done = false;
+            int v; bool done = false;
             while (!done) {
-                // Fetch the payload, and see if this was the last one.
                 done = radio.read( &v, sizeof(int) );
-
                 delay(10);
             }
 
-            if (v == RESETVAL) {
-                //test = (test+1)%3;
-                test2 = (test2+1)%8;
-                //radio.setDataRate(datarateLevel[test]);
-                // radio.setPALevel(outputPowerLevel[test]);
-                radio.setChannel(15*test2);
-                printf("Finished test; moving to next!\n");
-            }
+            printf("Received packet #");
+            printf(v);
+            printf("\n");
+
+            v = -v; // ACK waarde is negatief
 
             radio.stopListening();
             radio.write( &v, sizeof(int) );
@@ -229,19 +198,26 @@ void loop(void) {
         }
     }
     
-    if (role==role_ping_repeat){
-        if ( radio.available() ) {
-            // Dump the payloads until we've gotten everything
-            int v;
-            bool done = false;
-            while (!done) {
-                // Fetch the payload, and see if this was the last one.
-                done = radio.read( &v, sizeof(int) );
+    if (role==role_ping_repeat) {
 
+        if ( radio.available() ) {
+            int v; bool done = false;
+            while (!done) {
+                done = radio.read( &v, sizeof(int) );
                 delay(10);
             }
+
             radio.stopListening();
+
+            if (v > 0) { // Dit is het originele bericht; stuur naar receiver
+                radio.openWritingPipe(pipes[2]);
+            }
+            else { // Dit is de ACK; stuur naar sender
+                radio.openWritingPipe(pipes[0]);
+            }
+
             radio.write( &v, sizeof(int) );
+            
             radio.startListening();
     }
 }
