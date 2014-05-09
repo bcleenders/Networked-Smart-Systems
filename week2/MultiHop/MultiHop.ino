@@ -10,7 +10,7 @@
  * Example RF Radio Ping Pair
  *
  * This is an example of how to use the RF24 class.  Write this sketch to two different nodes,
- * connect the role_pin to ground on one.  The ping node sends the current time to the pong node,
+ * connect the role_pin_sender to ground on one.  The ping node sends the current time to the pong node,
  * which responds by sending the value back.  The ping node can then see how long the whole cycle
  * took.
  */
@@ -31,7 +31,7 @@ RF24 radio(3, 9);
 
 // sets the role of this unit in hardware.  Connect to GND to be the 'pong' receiver
 // Leave open to be the 'ping' transmitter
-const int role_pin = 7;
+const int role_pin_sender = 7;
 const int role_repeat = 8;
 
 //
@@ -52,14 +52,14 @@ const int RESETVAL = 42;
 // in this system.  Doing so greatly simplifies testing.  The hardware itself specifies
 // which node it is.
 //
-// This is done through the role_pin
+// This is done through the role_pin_sender
 //
 
 // The various roles supported by this sketch
 typedef enum { role_sender = 1, role_receiver, role_repeater } role_e;
 
 // The debug-friendly names of those roles
-const char* role_friendly_name[] = { "invalid", "Ping out", "Pong back"};
+const char* role_friendly_name[] = { "invalid", "Sender", "Receiver", "Repeater"};
 
 const rf24_pa_dbm_e outputPowerLevel[] = {RF24_PA_MAX, RF24_PA_HIGH, RF24_PA_LOW, RF24_PA_MIN};
 const rf24_datarate_e datarateLevel[] = {RF24_250KBPS, RF24_1MBPS, RF24_2MBPS};
@@ -70,8 +70,8 @@ role_e role;
 
 void setup(void) {
     // set up the role pin
-    pinMode(role_pin, INPUT);
-    digitalWrite(role_pin,HIGH);
+    pinMode(role_pin_sender, INPUT);
+    digitalWrite(role_pin_sender,HIGH);
     delay(20); // Just to get a solid reading on the role pin
     
     // set up the role pin
@@ -80,12 +80,12 @@ void setup(void) {
     delay(20); // Just to get a solid reading on the role pin
 
     // read the address pin, establish our role
-    if (digitalRead(role_pin))
-        role = role_receiver; // receiver
+    if (digitalRead(role_pin_sender))
+        role = role_sender; // sender
     else if (digitalRead(role_repeat))
         role = role_repeater; // repeater
     else
-        role = role_sender; // sender
+        role = role_receiver; // receiver
 
     //
     // Print preamble
