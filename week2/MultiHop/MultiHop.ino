@@ -32,7 +32,7 @@ RF24 radio(3, 9);
 // sets the role of this unit in hardware.  Connect to GND to be the 'pong' receiver
 // Leave open to be the 'ping' transmitter
 const int role_pin_sender = 7;
-const int role_repeat = 8;
+const int role_repeat = 6;
 
 //
 // Topology
