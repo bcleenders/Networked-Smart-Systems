@@ -116,18 +116,18 @@ void setup(void) {
 
     if ( role == role_sender ) { // Sender
         radio.openWritingPipe(pipes[1]); // Write to repeater
-        radio.openReadingPipe(1,pipes[1]); // Read from repeater
+        radio.openReadingPipe(1,pipes[0]); // Read from repeater
     }
     else if (role == role_repeater){ // Repeater
         // radio.openWritingPipe(pipes[0]);
-        radio.openReadingPipe(1,pipes[0]);
+        radio.openReadingPipe(1,pipes[1]);
         
         // radio.openWritingPipe(pipes[2]);
-        radio.openReadingPipe(2,pipes[2]);
+        //radio.openReadingPipe(2,pipes[2]);
     }
     else { // Receiver
         radio.openWritingPipe(pipes[1]);
-        radio.openReadingPipe(1,pipes[1]);
+        radio.openReadingPipe(1,pipes[2]);
     }
 
     radio.startListening();
@@ -228,7 +228,7 @@ void loop(void) {
             radio.write( &v, sizeof(int) );
             resetRadioReads();
             radio.startListening();
+        }
     }
-}
 }
 // vim:cin:ai:sts=2 sw=2 ft=cpp
