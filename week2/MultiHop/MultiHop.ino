@@ -137,12 +137,17 @@ void setup(void) {
 // Bevat het nummer dat nu gestuurd moet worden
 int currentNumber = 1;
 
+void resetRadioReads(void) {
+    radio.stopListening();
+    radio.openWritingPipe(0x111111110aLL);
+}
+
 void loop(void) {
     if (role == role_sender) {
         radio.stopListening();
         radio.openWritingPipe(pipes[1]);
         bool ok = radio.write( &currentNumber, sizeof(int) );
-        radio.openWritingPipe(0x111111111aLL);
+        resetRadioReads();
         radio.startListening();
 
         // Wait here until we get a response, or timeout (250ms)
@@ -197,7 +202,7 @@ void loop(void) {
             radio.stopListening();
             radio.openWritingPipe(pipes[1]);
             radio.write( &v, sizeof(int) );
-            radio.openWritingPipe(0x111111111aLL);
+            resetRadioReads();
             radio.startListening();
         }
     }
@@ -221,7 +226,7 @@ void loop(void) {
             }
 
             radio.write( &v, sizeof(int) );
-            
+            resetRadioReads();
             radio.startListening();
     }
 }
