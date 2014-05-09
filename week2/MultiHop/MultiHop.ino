@@ -80,12 +80,17 @@ void setup(void) {
     delay(20); // Just to get a solid reading on the role pin
 
     // read the address pin, establish our role
-    if (digitalRead(role_pin_sender))
-        role = role_sender; // sender
-    else if (digitalRead(role_repeat))
-        role = role_repeater; // repeater
-    else
-        role = role_receiver; // receiver
+    if (digitalRead(role_pin_sender)) {
+        role = role_sender; // sender        
+    }
+    else {
+        if (digitalRead(role_repeat)) {
+            role = role_repeater; // repeater
+        }
+        else {
+            role = role_receiver; // receiver
+        }
+    }
 
     //
     // Print preamble
