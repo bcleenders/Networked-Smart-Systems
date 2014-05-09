@@ -56,7 +56,7 @@ const int RESETVAL = 42;
 //
 
 // The various roles supported by this sketch
-typedef enum { role_sender = 1, role_receiver, role_repeater } role_e;
+typedef enum { role_sender = 1, role_receiver = 2, role_repeater = 3 } role_e;
 
 // The debug-friendly names of those roles
 const char* role_friendly_name[] = { "invalid", "Sender", "Receiver", "Repeater"};
@@ -74,16 +74,16 @@ void setup(void) {
     digitalWrite(role_pin_sender,HIGH);
     delay(20); // Just to get a solid reading on the role pin
     
-    // set up the role pin
-    pinMode(role_repeat, INPUT);
-    digitalWrite(role_repeat,HIGH);
-    delay(20); // Just to get a solid reading on the role pin
-
     // read the address pin, establish our role
     if (!digitalRead(role_pin_sender)) {
         role = role_sender; // sender        
     }
     else {
+            // set up the role pin
+        pinMode(role_repeat, INPUT);
+        digitalWrite(role_repeat,HIGH);
+        delay(20); // Just to get a solid reading on the role pin
+
         if (!digitalRead(role_repeat)) {
             role = role_repeater; // repeater
         }
@@ -119,11 +119,7 @@ void setup(void) {
         radio.openReadingPipe(1,pipes[0]); // Read from repeater
     }
     else if (role == role_repeater){ // Repeater
-        // radio.openWritingPipe(pipes[0]);
         radio.openReadingPipe(1,pipes[1]);
-        
-        // radio.openWritingPipe(pipes[2]);
-        //radio.openReadingPipe(2,pipes[2]);
     }
     else { // Receiver
         radio.openWritingPipe(pipes[1]);
