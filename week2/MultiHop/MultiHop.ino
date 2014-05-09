@@ -56,7 +56,7 @@ const int RESETVAL = 42;
 //
 
 // The various roles supported by this sketch
-typedef enum { role_sender = 1, role_pong_back, role_repeater } role_e;
+typedef enum { role_sender = 1, role_receiver, role_repeater } role_e;
 
 // The debug-friendly names of those roles
 const char* role_friendly_name[] = { "invalid", "Ping out", "Pong back"};
@@ -85,7 +85,7 @@ void setup(void) {
     else if (digitalRead(role_repeat))
         role = role_repeater; // repeater
     else
-        role = role_pong_out; // sender
+        role = role_sender; // sender
 
     //
     // Print preamble
@@ -172,7 +172,7 @@ void loop(void) {
 
 
 
-    if ( role == role_pong_back ) {
+    if ( role == role_receiver ) {
         // if there is data ready
         if ( radio.available() ) {
             
