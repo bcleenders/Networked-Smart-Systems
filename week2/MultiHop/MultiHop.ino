@@ -56,7 +56,7 @@ const int RESETVAL = 42;
 //
 
 // The various roles supported by this sketch
-typedef enum { role_ping_out = 1, role_pong_back } role_e;
+typedef enum { role_ping_out = 1, role_pong_back, role_ping_repeat } role_e;
 
 // The debug-friendly names of those roles
 const char* role_friendly_name[] = { "invalid", "Ping out", "Pong back"};
@@ -149,24 +149,21 @@ void loop(void) {
         if ( timeout ) {
           // Zend opnieuw!
           // currentNumber wordt opnieuw verzonden in de volgende iteratie van loop()
-          printf("Timeout occurred at sender; no ACK received. Packet #:");
-          printf(currentNumber);
-          printf("\n");
+          printf("Timeout occurred at sender; no ACK received. Packet #: %i\n", currentNumber);
         }
         else {
             int receivedValue;
             radio.read( &receivedValue, sizeof(int) );
 
             // ACK our value! Increase our success counter.
-            if(receivedValue == currentNumber) {
+            if(receivedValue == - currentNumber) {
                 // Success!
+                printf("ACK succesfully received for packet #%i\n", currentNumber);
                 currentNumber++;
             }
             else {
               // Received double ACK
-              printf("Received double ACK. Packet #:");
-              printf(currentNumber);
-              printf("\n");
+              printf("Received double ACK. Packet #: %i\n", currentNumber);
             }
         }
 
@@ -186,9 +183,7 @@ void loop(void) {
                 delay(10);
             }
 
-            printf("Received packet #");
-            printf(v);
-            printf("\n");
+            printf("Received packet # %i\n", v);
 
             v = -v; // ACK waarde is negatief
 
@@ -220,5 +215,6 @@ void loop(void) {
             
             radio.startListening();
     }
+}
 }
 // vim:cin:ai:sts=2 sw=2 ft=cpp
