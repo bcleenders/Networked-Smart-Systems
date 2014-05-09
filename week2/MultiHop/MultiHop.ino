@@ -56,7 +56,7 @@ const int RESETVAL = 42;
 //
 
 // The various roles supported by this sketch
-typedef enum { role_ping_out = 1, role_pong_back, role_ping_repeat } role_e;
+typedef enum { role_sender = 1, role_pong_back, role_repeater } role_e;
 
 // The debug-friendly names of those roles
 const char* role_friendly_name[] = { "invalid", "Ping out", "Pong back"};
@@ -80,12 +80,12 @@ void setup(void) {
     delay(20); // Just to get a solid reading on the role pin
 
     // read the address pin, establish our role
-    if (! digitalRead(role_pin))
-        role = role_ping_out;
+    if (digitalRead(role_pin))
+        role = role_receiver; // receiver
     else if (digitalRead(role_repeat))
-        role = role_ping_repeat;
+        role = role_repeater; // repeater
     else
-        role = role_pong_back;
+        role = role_pong_out; // sender
 
     //
     // Print preamble
@@ -109,11 +109,11 @@ void setup(void) {
     // improve reliability
     radio.setPayloadSize(8);
 
-    if ( role == role_ping_out ) { // Sender
+    if ( role == role_sender ) { // Sender
         radio.openWritingPipe(pipes[1]); // Write to repeater
         radio.openReadingPipe(1,pipes[1]); // Read from repeater
     }
-    else if (role == role_ping_repeat){ // Repeater
+    else if (role == role_repeater){ // Repeater
         // radio.openWritingPipe(pipes[0]);
         radio.openReadingPipe(1,pipes[0]);
         
@@ -133,7 +133,7 @@ void setup(void) {
 int currentNumber = 1;
 
 void loop(void) {
-    if (role == role_ping_out) {
+    if (role == role_sender) {
         radio.stopListening();
         bool ok = radio.write( &currentNumber, sizeof(int) );
         radio.startListening();
@@ -193,7 +193,7 @@ void loop(void) {
         }
     }
     
-    if (role==role_ping_repeat) {
+    if (role==role_repeater) {
 
         if ( radio.available() ) {
             int v; bool done = false;
