@@ -30,7 +30,9 @@ Een dergelijke constructie is een stuk gecompliceerder dan directe communicatie 
 \section{Probleemstelling}
 Om het probleem overzichtelijk te houden, is het aantal nodes in deze proef beperkt tot drie. Er is een zender, een ontvanger en een doorsturende node. Omdat het aantal nodes beperkt is, is er maar \'e\'en mogelijk pad. Hierdoor kan het pad vooraf vastgelegd worden, dit heet ook wel statische routering.
 
-De uiteindelijke opstelling moet de zender de garantie geven dat een bericht uiteindelijk ontvangen wordt door de ontvanger via de tussenliggende node. 
+De uiteindelijke opstelling moet de zender de garantie geven dat een bericht uiteindelijk ontvangen wordt door de ontvanger via de tussenliggende node.
+
+We willen nu weten of het mogelijk is om via een multihopnetwerk betrouwbare end-to-end communicatie te garanderen.
 
 \section{Protocol}
 Om deze garantie te bieden, kan gebruik worden gemaakt van het alternating bit protocol. Dit protocol stuurt een nummer -een bit- mee met een pakket, wanneer de ontvanger het ontvangt stuurt deze bevestiging met datzelfde nummer terug. Indien de zender een bevestiging met het correcte (laatst verzonden) nummer ontvangt, hoogt deze een counter met een op en stuurt deze het volgende pakket.
@@ -73,6 +75,8 @@ Onze implementatie gebruikt niet een enkele bit als identificatie van een pakket
 
 Tevens stuurt de ontvanger een ACK terug die niet de identificatiecode bevat, maar de negatieve waarde hiervan. Hierdoor is het direct duidelijk of een pakket een bevestiging is (indien de code kleiner dan 0 is), of echte data bevat. Dit helpt om ook in grote netwerken ervoor te zorgen dat een zender niet zijn zelf verzonden bericht als ACK kan lezen.
 
+Verder moet de communcatie op zowel korte als lange afstand betrouwbaar zijn, ook dit moet getest worden.
+
 \section{Resultaten}
 De implementatie, waarvan de code is bijgevoegd in appendix~\ref{sec:code}, is in verschillende vormen getest:
 \begin{itemize}
@@ -105,12 +109,14 @@ Omdat er gebruik gemaakt is van statistische routering, is het geen optie voor d
     \end{minipage}
 \end{figure}
 
+Op zowel korte als lange afstand (tussen sender en receiver zo'n veertig meter) bleken de nodes in staat te zijn nagenoeg alle packets succesvol af te leveren.
+
 \section{Conclusie}
-Lorem ipsum dolor sit amet, consectetur adipiscing elit. Donec a diam lectus. Sed sit amet ipsum mauris. Maecenas congue ligula ac quam viverra nec consectetur ante hendrerit. Donec et mollis dolor. Praesent et diam eget libero egestas mattis sit amet vitae augue. Nam tincidunt congue enim, ut porta lorem lacinia consectetur. Donec ut libero sed arcu vehicula ultricies a non tortor. Lorem ipsum dolor sit amet, consectetur adipiscing elit. Aenean ut gravida lorem. Ut turpis felis, pulvinar a semper sed, adipiscing id dolor. Pellentesque auctor nisi id magna consequat sagittis. Curabitur dapibus enim sit amet elit pharetra tincidunt feugiat nisl imperdiet. Ut convallis libero in urna ultrices accumsan. Donec sed odio eros. Donec viverra mi quis quam pulvinar at malesuada arcu rhoncus. Cum sociis natoque penatibus et magnis dis parturient montes, nascetur ridiculus mus. In rutrum accumsan ultricies. Mauris vitae nisi at sem facilisis semper ac in est.
+Concluderend, het is wel degelijk mogelijk om via een multihopnetwerk betrouwbare end-to-end communicatie te garanderen. Bij het uitgevoerde onderzoek zijn de resultaten verassend goed. Over een grote afstand waarbij veel mogelijke obstakels en stoorzenders aanwezig waren, bleken de nodes in staat te zijn nagenoeg alle individuele packets succesvol af te leveren bij de desbetreffende ontvanger.
 
-Vivamus fermentum semper porta. Nunc diam velit, adipiscing ut tristique vitae, sagittis vel odio. Maecenas convallis ullamcorper ultricies. Curabitur ornare, ligula semper consectetur sagittis, nisi diam iaculis velit, id fringilla sem nunc vel mi. Nam dictum, odio nec pretium volutpat, arcu ante placerat erat, non tristique elit urna et turpis. Quisque mi metus, ornare sit amet fermentum et, tincidunt et orci. Fusce eget orci a orci congue vestibulum. Ut dolor diam, elementum et vestibulum eu, porttitor vel elit. Curabitur venenatis pulvinar tellus gravida ornare. Sed et erat faucibus nunc euismod ultricies ut id justo. Nullam cursus suscipit nisi, et ultrices justo sodales nec. Fusce venenatis facilisis lectus ac semper. Aliquam at massa ipsum. Quisque bibendum purus convallis nulla ultrices ultricies. Nullam aliquam, mi eu aliquam tincidunt, purus velit laoreet tortor, viverra pretium nisi quam vitae mi. Fusce vel volutpat elit. Nam sagittis nisi dui.
+In gedachten nemend dat een (sensor)netwerk op een veel grotere schaal nog steeds betrouwbaar moet zijn, is het wel verstandig ervoor te zorgen dat er altijd twee andere nodes bereikt kunnen worden. Op deze manier is het veiliger om te zeggen dat een packet altijd bij zijn bestemming aankomt, omdat je er dan rekening mee houdt dat er eventueel een node kapot zou kunnen gaan of uitvalt. Mocht dit gebeuren, dan kan de andere node die binnen bereik is de taak van de kapotte node overnemen.
 
-Suspendisse lectus leo, consectetur in tempor sit amet, placerat quis neque. Etiam luctus porttitor lorem, sed suscipit est rutrum non. Curabitur lobortis nisl a enim congue semper. Aenean commodo ultrices imperdiet. Vestibulum ut justo vel sapien venenatis tincidunt. Phasellus eget dolor sit amet ipsum dapibus condimentum vitae quis lectus. Aliquam ut massa in turpis dapibus convallis. Praesent elit lacus, vestibulum at malesuada et, ornare et est. Ut augue nunc, sodales ut euismod non, adipiscing vitae orci. Mauris ut placerat justo. Mauris in ultricies enim. Quisque nec est eleifend nulla ultrices egestas quis ut quam. Donec sollicitudin lectus a mauris pulvinar id aliquam urna cursus. Cras quis ligula sem, vel elementum mi. Phasellus non ullamcorper urna.
+Verder onderzoek zou erbij kunnen helpen om het netwerk dynamisch te maken. Op die manier is het veel gemakkelijker om nodes te verwijderen of toe te voegen in een netwerk en gaat het netwerk dus ook beter om met een node die kapot gaat of uitvalt. Om deze functionaliteit te kunnen bieden moet het protocol nog veel aangepast worden en is het nodig om dynamische routering te implementeren.
 
 \newpage
 \appendix
