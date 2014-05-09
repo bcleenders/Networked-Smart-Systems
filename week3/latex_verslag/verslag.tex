@@ -9,7 +9,7 @@
 \usepackage[font=small,labelfont=bf]{caption}
 \usepackage{float}
 \usepackage[dutch]{babel}
-
+\usepackage[section]{placeins}
 
 \DeclareCaptionLabelFormat{andtable}{#1~#2  \&  \tablename~\thetable}
 
@@ -35,13 +35,37 @@ De uiteindelijke opstelling moet de zender de garantie geven dat een bericht uit
 \section{Protocol}
 Om deze garantie te bieden, kan gebruik worden gemaakt van het alternating bit protocol. Dit protocol stuurt een nummer -een bit- mee met een pakket, wanneer de ontvanger het ontvangt stuurt deze bevestiging met datzelfde nummer terug. Indien de zender een bevestiging met het correcte (laatst verzonden) nummer ontvangt, hoogt deze een counter met een op en stuurt deze het volgende pakket.
 
-Figuur~\ref{fig:states} laat de mogelijke staten en transities van de verzender en ontvanger zien.
+Figuur~\ref{fig:flow} illustreert het pad dat een pakket met bijbehorende bevestiging aflegt. Figuur~\ref{fig:roles} toont de verschillende staten waarin een zender/repeater/ontvanger zich kan bevinden en de transities tussen deze staten.
 
-\begin{figure}[p]
+\begin{figure}[ht!]
     \centering
-    \includegraphics[width=0.8\textwidth]{happy-panda.jpg}
-    \caption{State-diagram Alternating Bit Protocol}
-    \label{fig:states}
+    \includegraphics[width=0.8\textwidth]{flow.png}
+    \caption{}
+    \label{fig:flow}
+\end{figure}
+
+\begin{figure}[ht!]
+    \begin{minipage}{\textwidth}
+        \begin{minipage}{0.49\textwidth}
+            \centering
+            \includegraphics[width=\textwidth]{receiver.png}
+            \caption*{Receiver Arduino}
+        \end{minipage}
+        \hfill
+        \begin{minipage}{0.49\textwidth}
+            \centering
+            \includegraphics[width=\textwidth]{repeater.png}
+            \caption*{Repeater Arduino}
+        \end{minipage}
+        \hfill\centering
+        \begin{minipage}{0.8\textwidth}
+            \centering
+            \includegraphics[width=0.95\textwidth]{sender.png}
+            \caption*{Sender Arduino}
+        \end{minipage}
+    \caption{State-diagram Alternating Bit Protocol voor de drie communicerende Arduino's.}
+    \label{fig:roles}
+    \end{minipage}
 \end{figure}
 
 \section{Methodologie}
@@ -52,7 +76,7 @@ Tevens stuurt de ontvanger een ACK terug die niet de identificatiecode bevat, ma
 \section{Resultaten}
 De implementatie, waarvan de code is bijgevoegd in appendix~\ref{sec:code}, is in verschillende vormen getest:
 \begin{itemize}
-	\item De zender, repeater en ontvanger allemaal binnen ontvangstbereik van elkaar.
+	\item De zender, repeater en ontvanger allemaal binnen elkaars ontvangstbereik.
 	\item De zender en repeater respectievelijk de repeater en ontvanger binnen ontvangstbereik, maar zender en ontvanger buiten ontvangstbereik.
 	\item Alleen zender en ontvanger binnen ontvangstbereik; repeater buiten bereik.
 \end{itemize}
