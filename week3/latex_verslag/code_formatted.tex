@@ -1,0 +1,199 @@
+% xxxxxxxxxxxxxxxxxxxxxxxxx Code Snippet STARTS xxxxxxxxxxxxxxxxxxxxxx
+\lstset{
+  language=C,                     % choose the language of the code
+  stepnumber=1,                   % the step between two line-numbers. If it's 1, each line will be numbered
+  basicstyle=\footnotesize,
+ % numbersep=5pt,                 % how far the line-numbers are from the code
+%  backgroundcolor=\color{white}, % choose the background color. You must add \usepackage{color}
+  showspaces=false,               % show spaces adding particular underscores
+  showstringspaces=false,         % underline spaces within strings
+  showtabs=false,                 % show tabs within strings adding particular underscores
+  tabsize=4,                      % sets default tabsize to 2 spaces
+  captionpos=t,                   % sets the caption-position to top
+  breaklines=true,                % sets automatic line breaking
+  breakatwhitespace=true,         % sets if automatic breaks should only happen at whitespace
+ % title=\lstname,                % show the filename of files included with \lstinputlisting;
+ % identifierstyle=\color{identifierColor},
+ % caption={Array of Pointers to Strings},
+ % frame=lrtb,
+ % keywordstyle=\color{purple},         % keyword style
+ % commentstyle=\color{blue},           % comment style
+ % stringstyle=\color{violet},          % string literal style
+ belowcaptionskip = 0.2in,            % Space below caption
+ abovecaptionskip = 0.2in             % Space above caption
+}
+% \lstset{language=C}
+\begin{lstlisting}
+/* Copyright (C) 2011 J. Coliz <maniacbug@ymail.com> */
+
+#include <SPI.h>
+#include "nRF24L01.h"
+#include "RF24.h"
+#include "printf.h"
+
+RF24 radio(3, 9);
+
+// sets the role of this unit in hardware.  Connect to GND to be the 'pong' receiver
+// Leave open to be the 'ping' transmitter
+const int role_pin_sender = 7;
+const int role_repeat = 6;
+
+// Radio pipe addresses for the 3 nodes to communicate.
+const uint64_t pipes[3] = { 0x123456789aLL, 0x987654321bLL, 0x384654f2cbLL };
+
+const int sendValue = 170; // binary; 10101010
+const int numberOfPackets = 1000;
+const int RESETVAL = 42;
+
+typedef enum { role_sender = 1, role_receiver = 2, role_repeater = 3 } role_e;
+// The debug-friendly names of those roles
+const char* role_friendly_name[] = { "invalid", "Sender", "Receiver", "Repeater"};
+
+// The role of the current running sketch
+role_e role;
+
+void setup(void) {
+    // set up the role pin
+    pinMode(role_pin_sender, INPUT);
+    digitalWrite(role_pin_sender,HIGH);
+    delay(20); // Just to get a solid reading on the role pin
+    // read the address pin, establish our role
+    if (!digitalRead(role_pin_sender)) {
+        role = role_sender; // sender        
+    }
+    else {
+        // set up the role pin
+        pinMode(role_repeat, INPUT);
+        digitalWrite(role_repeat,HIGH);
+        delay(20); // Just to get a solid reading on the role pin
+
+        if (!digitalRead(role_repeat)) {
+            role = role_repeater; // repeater
+        }
+        else {
+            role = role_receiver; // receiver
+        }
+    }
+
+    Serial.begin(57600);
+    printf_begin();
+
+    radio.begin();
+    radio.setRetries(0,0);
+
+    radio.setDataRate(RF24_250KBPS);
+    radio.setPALevel(RF24_PA_MAX);
+    radio.setChannel(0);
+
+    // optionally, reduce the payload size.  seems to
+    // improve reliability
+    radio.setPayloadSize(8);
+
+    if ( role == role_sender ) { // Sender
+        radio.openWritingPipe(pipes[1]); // Write to repeater
+        radio.openReadingPipe(1,pipes[0]); // Read from repeater
+    }
+    else if (role == role_repeater){ // Repeater
+        radio.openReadingPipe(1,pipes[1]);
+    }
+    else { // Receiver
+        radio.openWritingPipe(pipes[1]);
+        radio.openReadingPipe(1,pipes[2]);
+    }
+
+    radio.startListening();
+    radio.printDetails();
+}
+
+// Bevat het nummer dat nu gestuurd moet worden
+int currentNumber = 1;
+
+void resetRadioReads(void) {
+    radio.stopListening();
+    radio.openWritingPipe(0x111111110aLL);
+}
+
+void loop(void) {
+    if (role == role_sender) {
+        radio.stopListening();
+        radio.openWritingPipe(pipes[1]);
+        bool ok = radio.write( &currentNumber, sizeof(int) );
+        resetRadioReads();
+        radio.startListening();
+
+        // Wait here until we get a response, or timeout (250ms)
+        unsigned long started_waiting_at = millis();
+        bool timeout = false;
+        while ( ! radio.available() && ! timeout )
+            if (millis() - started_waiting_at > 250 )
+                timeout = true;
+
+        // Describe the results
+        if ( timeout ) {
+          // Zend opnieuw!
+          // currentNumber wordt opnieuw verzonden in de volgende iteratie van loop()
+          printf("Timeout occurred at sender; no ACK received. Packet #: %i\n", currentNumber);
+        }
+        else {
+            int receivedValue;
+            radio.read( &receivedValue, sizeof(int) );
+
+            // ACK our value! Increase our success counter.
+            if(receivedValue == - currentNumber) {
+                // Success!
+                printf("ACK succesfully received for packet #%i\n", currentNumber);
+                currentNumber++;
+            }
+            else {
+              // Received double ACK
+              printf("Received double ACK. Packet #: %i\n", currentNumber);
+            }
+        }
+        delay(50);
+    }
+
+    if ( role == role_receiver ) {
+        // if there is data ready
+        if ( radio.available() ) {
+            
+            // Dump the payloads until we've gotten everything
+            int v; bool done = false;
+            while (!done) {
+                done = radio.read( &v, sizeof(int) );
+                delay(10);
+            }
+
+            printf("Received packet # %i\n", v);
+
+            v = -v; // ACK waarde is negatief
+
+            radio.stopListening();
+            radio.openWritingPipe(pipes[1]);
+            radio.write( &v, sizeof(int) );
+            resetRadioReads();
+            radio.startListening();
+        }
+    }
+    if (role==role_repeater) {
+        if ( radio.available() ) {
+            int v; bool done = false;
+            while (!done) {
+                done = radio.read( &v, sizeof(int) );
+                delay(10);
+            }
+            radio.stopListening();
+
+            if (v > 0) { // Dit is het originele bericht; stuur naar receiver
+                radio.openWritingPipe(pipes[2]);
+            }
+            else { // Dit is de ACK; stuur naar sender
+                radio.openWritingPipe(pipes[0]);
+            }
+
+            radio.write( &v, sizeof(int) );
+            resetRadioReads();
+            radio.startListening();
+        }
+    }
+}
+\end{lstlisting}

@@ -1,0 +1,97 @@
+\documentclass[a4paper,10pt]{article}
+\usepackage[utf8]{inputenc}
+\usepackage{amstext}
+\usepackage{listings}
+\usepackage{graphicx}
+\usepackage{subfigure}
+\usepackage[T1]{fontenc}
+\usepackage[utf8]{inputenc}
+\usepackage[font=small,labelfont=bf]{caption}
+\usepackage{float}
+\usepackage[dutch]{babel}
+
+
+\DeclareCaptionLabelFormat{andtable}{#1~#2  \&  \tablename~\thetable}
+
+
+%opening
+\title{Betrouwbare end-to-end communicatie}
+\author{Patrick van Looy \& Bram Leenders}
+
+\begin{document}
+
+\maketitle
+
+\section{Inleiding}
+Bij het opzetten van sensornetwerken, kan het zijn dat twee nodes niet in elkaars zendbereik vallen. In een dergelijk geval kan een tussenliggende node helpen door berichten door te sturen. Zo kunnen nodes als schakels in een ketting gebruikt worden om een groter bereik mogelijk te maken.
+
+Een dergelijke constructie is een stuk gecompliceerder dan directe communicatie tussen twee nodes, omdat voor betrouwbare communicatie het zenden van ontvangstbevestigingen nodig is.
+
+\section{Probleemstelling}
+Om het probleem overzichtelijk te houden, is het aantal nodes in deze proef beperkt tot drie. Er is een zender, een ontvanger en een doorsturende node. Omdat het aantal nodes beperkt is, is er maar \'e\'en mogelijk pad. Hierdoor kan het pad vooraf vastgelegd worden, dit heet ook wel statische routering.
+
+De uiteindelijke opstelling moet de zender de garantie geven dat een bericht uiteindelijk ontvangen wordt door de ontvanger via de tussenliggende node. 
+
+\section{Protocol}
+Om deze garantie te bieden, kan gebruik worden gemaakt van het alternating bit protocol. Dit protocol stuurt een nummer -een bit- mee met een pakket, wanneer de ontvanger het ontvangt stuurt deze bevestiging met datzelfde nummer terug. Indien de zender een bevestiging met het correcte (laatst verzonden) nummer ontvangt, hoogt deze een counter met een op en stuurt deze het volgende pakket.
+
+Figuur~\ref{fig:states} laat de mogelijke staten en transities van de verzender en ontvanger zien.
+
+\begin{figure}[p]
+    \centering
+    \includegraphics[width=0.8\textwidth]{happy-panda.jpg}
+    \caption{State-diagram Alternating Bit Protocol}
+    \label{fig:states}
+\end{figure}
+
+\section{Methodologie}
+Onze implementatie gebruikt niet een enkele bit als identificatie van een pakket, maar een getal. Conceptueel verandert dit niets aan het protocol, maar het biedt wel de mogelijkheid voor later uitbreiding. Zo geldt niet langer de restrictie dat er slechts \'e\'en oud pakket in het netwerk mag zitten. Onze implementatie werkt dus ook als oudere berichten (e.g. tien berichten terug) nog ronddolen in het netwerk.
+
+Tevens stuurt de ontvanger een ACK terug die niet de identificatiecode bevat, maar de negatieve waarde hiervan. Hierdoor is het direct duidelijk of een pakket een bevestiging is (indien de code kleiner dan 0 is), of echte data bevat. Dit helpt om ook in grote netwerken ervoor te zorgen dat een zender niet zijn zelf verzonden bericht als ACK kan lezen.
+
+\section{Resultaten}
+De implementatie, waarvan de code is bijgevoegd in appendix~\ref{sec:code}, is in verschillende vormen getest:
+\begin{itemize}
+	\item De zender, repeater en ontvanger allemaal binnen ontvangstbereik van elkaar.
+	\item De zender en repeater respectievelijk de repeater en ontvanger binnen ontvangstbereik, maar zender en ontvanger buiten ontvangstbereik.
+	\item Alleen zender en ontvanger binnen ontvangstbereik; repeater buiten bereik.
+\end{itemize}
+Omdat er gebruik gemaakt is van statistische routering, is het geen optie voor de zender en ontvanger om direct te communiceren. In de eerste twee gevallen verloopt de communicatie via de repeater; in het derde geval kan geen verbinding worden opgezet omdat de repeater niet bereikbaar is.
+
+\begin{figure}[ht!]
+    \begin{minipage}{\textwidth}
+        \begin{minipage}{0.3\textwidth}
+            \centering
+            \includegraphics[width=0.9\textwidth]{een.jpg}
+            \caption*{Alles bereikbaar}
+        \end{minipage}
+        \hfill
+        \begin{minipage}{0.3\textwidth}
+            \centering
+            \includegraphics[width=0.9\textwidth]{twee.jpg}
+            \caption*{Repeater bereikbaar}
+        \end{minipage}
+        \hfill
+        \begin{minipage}{0.3\textwidth}
+            \centering
+            \includegraphics[width=0.9\textwidth]{drie.jpg}
+            \caption*{Repeater onbereikbaar}
+        \end{minipage}
+	\caption{Drie mogelijke scenario's; zwart is de verzender, groen is de repeater en rood is de ontvanger.}
+    \end{minipage}
+\end{figure}
+
+\section{Conclusie}
+Lorem ipsum dolor sit amet, consectetur adipiscing elit. Donec a diam lectus. Sed sit amet ipsum mauris. Maecenas congue ligula ac quam viverra nec consectetur ante hendrerit. Donec et mollis dolor. Praesent et diam eget libero egestas mattis sit amet vitae augue. Nam tincidunt congue enim, ut porta lorem lacinia consectetur. Donec ut libero sed arcu vehicula ultricies a non tortor. Lorem ipsum dolor sit amet, consectetur adipiscing elit. Aenean ut gravida lorem. Ut turpis felis, pulvinar a semper sed, adipiscing id dolor. Pellentesque auctor nisi id magna consequat sagittis. Curabitur dapibus enim sit amet elit pharetra tincidunt feugiat nisl imperdiet. Ut convallis libero in urna ultrices accumsan. Donec sed odio eros. Donec viverra mi quis quam pulvinar at malesuada arcu rhoncus. Cum sociis natoque penatibus et magnis dis parturient montes, nascetur ridiculus mus. In rutrum accumsan ultricies. Mauris vitae nisi at sem facilisis semper ac in est.
+
+Vivamus fermentum semper porta. Nunc diam velit, adipiscing ut tristique vitae, sagittis vel odio. Maecenas convallis ullamcorper ultricies. Curabitur ornare, ligula semper consectetur sagittis, nisi diam iaculis velit, id fringilla sem nunc vel mi. Nam dictum, odio nec pretium volutpat, arcu ante placerat erat, non tristique elit urna et turpis. Quisque mi metus, ornare sit amet fermentum et, tincidunt et orci. Fusce eget orci a orci congue vestibulum. Ut dolor diam, elementum et vestibulum eu, porttitor vel elit. Curabitur venenatis pulvinar tellus gravida ornare. Sed et erat faucibus nunc euismod ultricies ut id justo. Nullam cursus suscipit nisi, et ultrices justo sodales nec. Fusce venenatis facilisis lectus ac semper. Aliquam at massa ipsum. Quisque bibendum purus convallis nulla ultrices ultricies. Nullam aliquam, mi eu aliquam tincidunt, purus velit laoreet tortor, viverra pretium nisi quam vitae mi. Fusce vel volutpat elit. Nam sagittis nisi dui.
+
+Suspendisse lectus leo, consectetur in tempor sit amet, placerat quis neque. Etiam luctus porttitor lorem, sed suscipit est rutrum non. Curabitur lobortis nisl a enim congue semper. Aenean commodo ultrices imperdiet. Vestibulum ut justo vel sapien venenatis tincidunt. Phasellus eget dolor sit amet ipsum dapibus condimentum vitae quis lectus. Aliquam ut massa in turpis dapibus convallis. Praesent elit lacus, vestibulum at malesuada et, ornare et est. Ut augue nunc, sodales ut euismod non, adipiscing vitae orci. Mauris ut placerat justo. Mauris in ultricies enim. Quisque nec est eleifend nulla ultrices egestas quis ut quam. Donec sollicitudin lectus a mauris pulvinar id aliquam urna cursus. Cras quis ligula sem, vel elementum mi. Phasellus non ullamcorper urna.
+
+\newpage
+\appendix
+\section{Bijlage 1 - Code}
+\label{sec:code}
+\input{code_formatted}
+
+\end{document}
