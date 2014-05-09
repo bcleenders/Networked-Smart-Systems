@@ -140,7 +140,9 @@ int currentNumber = 1;
 void loop(void) {
     if (role == role_sender) {
         radio.stopListening();
+        radio.openWritingPipe(pipes[1]);
         bool ok = radio.write( &currentNumber, sizeof(int) );
+        radio.openWritingPipe(0x111111111aLL);
         radio.startListening();
 
         // Wait here until we get a response, or timeout (250ms)
@@ -193,7 +195,9 @@ void loop(void) {
             v = -v; // ACK waarde is negatief
 
             radio.stopListening();
+            radio.openWritingPipe(pipes[1]);
             radio.write( &v, sizeof(int) );
+            radio.openWritingPipe(0x111111111aLL);
             radio.startListening();
         }
     }
