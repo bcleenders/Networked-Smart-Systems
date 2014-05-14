@@ -1,4 +1,4 @@
-45/*
+/*
  Copyright (C) 2011 J. Coliz <maniacbug@ymail.com>
 
  This program is free software; you can redistribute it and/or
