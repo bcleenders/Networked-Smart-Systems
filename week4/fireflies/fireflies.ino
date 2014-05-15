@@ -37,7 +37,7 @@ void setup(void)
   // Open pipes to other nodes for communication
   //
     radio.openWritingPipe(pipe);
-    radio.openReadingPipe(pipe);
+    radio.openReadingPipe(0, pipe);
 
 
   //
@@ -53,8 +53,8 @@ void setup(void)
   radio.printDetails();
 }
 
-const timespan = 100;
-const stepsize = 10;
+const int timespan = 2000;
+const int stepsize = 100;
 int counter = 0;
 
 void loop(void)
@@ -68,9 +68,9 @@ while(counter < timespan) {
     if(counter >= timespan) {
         // Stuur een signaal & laat LED knipperen
         radio.stopListening();
-        radio.write();
+        radio.write("1", sizeof(int));
         digitalWrite(led_pin, HIGH); // laat LED branden
-        delay(50);
+        delay(500);
         digitalWrite(led_pin, LOW); // zet LED uit
         // Reset de state van de machine
         counter = 0;
@@ -78,7 +78,7 @@ while(counter < timespan) {
     }
 
     if(radio.available()) {// ontvang signaal
-        counter = timespan - (timespan-counter)/2
+        counter = timespan - (timespan-counter)/2;
     }
 
     delay(stepsize);
