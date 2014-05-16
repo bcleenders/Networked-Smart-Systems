@@ -3,10 +3,6 @@
 #include "RF24.h"
 #include "printf.h"
 
-
-// Set up nRF24L01 radio on SPI bus plus pins 9 & 10
-// (MV:) Adapted to work with the configuration of the shield. Original: RF24 radio(9,10);
-
 RF24 radio(3, 9);
 
 // Radio pipe addresses for the 2 nodes to communicate.
@@ -57,31 +53,29 @@ const int timespan = 2000;
 const int stepsize = 100;
 int counter = 0;
 
-void loop(void)
-{
-// Slaap altijd iig de helft van de tijd
-delay(timespan);
+void loop(void) {
+    // Slaap altijd iig de helft van de tijd
+    delay(timespan);
 
-while(counter < timespan) {
-    counter += stepsize;
+    while(counter < timespan) {
+        if(counter >= timespan) {
+            // Stuur een signaal & laat LED knipperen
+            radio.stopListening();
+            radio.write("1", sizeof(int));
+            digitalWrite(led_pin, HIGH); // laat LED branden
+            delay(500);
+            digitalWrite(led_pin, LOW); // zet LED uit
+            // Reset de state van de machine
+            counter = 0;
+            radio.startListening();
+        }
 
-    if(counter >= timespan) {
-        // Stuur een signaal & laat LED knipperen
-        radio.stopListening();
-        radio.write("1", sizeof(int));
-        digitalWrite(led_pin, HIGH); // laat LED branden
-        delay(500);
-        digitalWrite(led_pin, LOW); // zet LED uit
-        // Reset de state van de machine
-        counter = 0;
-        radio.startListening();
+        if(radio.available()) { // ontvang signaal
+            counter = timespan + stepsize;  //- (timespan-counter)/2;
+        }
+        else {
+            delay(stepsize);
+            counter += stepsize;
+        }
     }
-
-    if(radio.available()) {// ontvang signaal
-        counter = timespan - (timespan-counter)/2;
-    }
-
-    delay(stepsize);
 }
-}
-// vim:cin:ai:sts=2 sw=2 ft=cpp
