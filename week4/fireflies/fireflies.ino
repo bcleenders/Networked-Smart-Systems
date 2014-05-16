@@ -38,35 +38,34 @@ void setup(void)
   radio.printDetails();
 }
 
-const int timespan = 2000;
-const int stepsize = 100;
+const int timespan = 3000;
+const int stepsize = 20;
 int counter = 0;
 
 void loop(void) {
-  // Slaap altijd iig de helft van de tijd
-
     if(counter >= timespan) {
       printf("counter >= timespan\n");
     // Stuur een signaal & laat LED knipperen
     radio.stopListening();
     radio.write("1", sizeof(int));
     digitalWrite(led_pin, HIGH); // laat LED branden
-    delay(1000);
-    digitalWrite(led_pin, LOW); // zet LED uit
     
     // Reset de state van de machine
     counter = 0;
     // Slaap altijd helft van de tijd (refractory period)
-    delay(timespan);
+   
+    delay(200);
+    digitalWrite(led_pin, LOW); // zet LED uit
+    delay(timespan - 200);
+        
     radio.startListening();
   }
 
   if(radio.available()) { // ontvang signaal
-  printf("Radio available");
-    counter = timespan + stepsize;  //- (timespan-counter)/2;
+    printf("Radio available");
+    counter = timespan - (timespan-counter)/3;
   }
   else {
-      printf("Not radio available");
     delay(stepsize);
     counter += stepsize;
   }
