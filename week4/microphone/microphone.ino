@@ -15,7 +15,7 @@ void loop() {
   
   // wait a bit for the analog-to-digital converter 
   // to stabilize after the last reading:
-  delay(50);
+  delay(20);
 }
 
 /* Processing code:

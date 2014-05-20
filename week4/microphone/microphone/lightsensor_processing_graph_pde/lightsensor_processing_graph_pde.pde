@@ -12,7 +12,7 @@
  
  void setup () {
  // set the window size:
- size(400, 300);        
+ size(600  , 300);        
  
  // List all the available serial ports
  println(Serial.list());
