@@ -4,6 +4,7 @@
 \usepackage{listings}
 \usepackage{graphicx}
 \usepackage{subfigure}
+\usepackage[colorinlistoftodos]{todonotes}
 \usepackage[T1]{fontenc}
 \usepackage[utf8]{inputenc}
 \usepackage[font=small,labelfont=bf]{caption}
@@ -25,6 +26,46 @@
 \section{Inleiding}
 Kijk! Een referentie! \cite{sundararaman2005clock} Wow! En hij staat ook onderaan!
 
+
+\section{Tjirpende Arduino's}
+De implementatie beschreven in de vorige secties, is niet afhankelijk van het precieze signaal dat de Arduino's geven. Het is alleen afhankelijk van het moment waarop het signaal uitgezonden en ontvangen wordt, en de tijd hiertussen mag niet exorbitant groot worden of wisselend lang en kort duren.
+
+In plaats van een radiosignaal kunnen ook andere signalen uitgewisseld worden, bijvoorbeeld een geluidssignaal. De implementatie hiervan heeft wel wat meer voeten in de aarde, omdat er erg veel ruis is. Tevens heeft de Arduino niet een standaardimplementatie die "pieken" kan detecteren; er is dus functie voor microfoons die vergelijkbaar is met \texttt{radio.available()}.
+
+\subsection{Analoge signaalverwerking}
+Een microfoon alleen levert geen geschikt signaal op. Het signaal is te zacht, bevat teveel ruis en is analoog. Om het door de Arduino te laten verwerken moet het signaal versterkt worden en omgezet worden naar een digitaal signaal. Dit doen we in drie stappen:
+
+\todo[inline]{TODO: Drie stappen uitwerken}
+
+\begin{itemize}
+	\item High-pass filter om ruis te filteren
+	\item Versterker
+	\item Omzetten naar digitaal (ADC)
+\end{itemize}
+
+\begin{figure}[ht!]
+    \centering
+    \includegraphics[width=0.8\textwidth]{high_pass_filter_circuit.png}
+    \caption{High-pass filter met versterker en ADC.}
+    \label{fig:circuit}
+\end{figure}
+
+
+\subsection{Signaalverwerking}
+In figuur~\ref{fig:on_off} is zichtbaar dat het versturen van een geluidssignaal een sterk wisselend inputsignaal geeft.
+\begin{figure}[ht!]
+    \centering
+    \includegraphics[width=0.8\textwidth]{resonance_on_off_commit_ff82f.png}
+    \caption{Inkomend signaal bij pulserend signaal.}
+    \label{fig:on_off}
+\end{figure}
+
+\begin{figure}[ht!]
+    \centering
+    \includegraphics[width=0.8\textwidth]{resonance_2_frequencies_commit_ff82f.png}
+    \caption{Inkomend signaal bij verschillende geluidsfrequencies.}
+    \label{fig:resonance}
+\end{figure}
 
 % \newpage
 % \appendix
