@@ -24,44 +24,59 @@
 \maketitle
 
 \section{Inleiding}
-Kijk! Een referentie! \cite{sundararaman2005clock} Wow! En hij staat ook onderaan!
+Om energiezuinige draadloze communicatie mogelijk te maken, is er tijdsynchronisatie nodig tussen de verschillende nodes. Wanneer nodes gesynchroniseerd zijn kunnen ze op vaste momenten naar elkaar zenden en luisteren, en kunnen ze de rest van de tijd in een slaapstand zijn. Omdat communicatie relatief veel energie vraagt en een slaapstand zeer weinig, biedt synchronisatie dus mogelijkheden voor energiebesparing.
 
-Om draadloze communicatie mogelijk te maken, is er tijdsynchronisatie nodig. Clocks van nodes lopen standaard vrijwel nooit gelijk. Willen verschillende nodes naar elkaar kunnen versturen, dan moeten ze elkaars berichten ACK-en met een daarin een timestamp. Dit vereist wel dat op de nodes die met elkaar communiceren de tijd gelijk moet lopen.
+Tijdsynchronisatie kan op verschillende manieren geimplementeerd worden. In dit onderzoek gaan we een verschijnsel nabootsen wat we in de natuur ook kunnen vinden. De voorbeelden die hierbij gehanteerd worden, zijn vuurvliegjes en krekels. Vuurvliegjes, bijvoorbeeld, willen van nature synchroon knipperen\cite{buck1988synchronous}. Ditzelfde gedrag kan door Arduino's nagebootst worden, met behulp van radio- of geluidssignalen.
 
-Tijdsynchronisatie kun je op verschillende manieren implementeren. In dit geval gaan we een verschijnsel nabootsen wat we in de natuur ook kunnen vinden. De voorbeelden die hierbij gehanteerd worden, zijn vuurvliegjes en krekels. Vuurvliegjes willen van nature synchroon knipperen. Dit kunnen wij met Arduinos ook implementeren. Tevens kunnen we ook met geluid gaan werken, zoals krekels dat doen door te tjirpen.
+In dit onderzoek kijken we naar een specifiek algoritme, het firefly algoritme\cite{leidenfrost2009firefly, yang2013firefly}. Dit algoritme implementeren we zowel voor radiocommunicatie als voor communicatie met behulp van geluid. In sectie~\ref{sec:probleemstelling} geven we een kort overzicht van eisen waaraan het protocol dient te voldoen. Sectie~\ref{sec:radiosync} beschrijft de implementatie voor radiocommunicatie, en sectie~\ref{sec:geluidssec} beschrijft dit voor synchronisatie met behulp van geluid. In sectie~\ref{sec:resultaten} wordt besproken hoe de beide implemenaties functioneren, en geven we een korte discussie over de beide manieren van synchronisatie.
 
-Voordat we onze implementatie kunnen maken, zullen we eerst wat gerelateerd werk moeten bestuderen om ons probleem op te lossen. Hierna zullen we een algoritme gaan schrijven en deze testen met Arduinos.
-
-\section{Probleemstelling}
+\section{Probleemstelling}\label{sec:probleemstelling}
 Dit is een probleem!
 
+Eisen:
+\begin{itemize}
+    \item Nodes kunnen uit een groep verdwijnen zonder rest te beinvloeden.
+    \item Nodes kunnen toegevoegd worden aan een groep, en het geheel synchroniseert.
+    \item Twee groepen kunnen samengevoegd worden, en het geheel synchroniseert.
+    \item Wanneer nodes uit synchronisatie raken, worden deze bijgesteld.
+    \item Frequentie van communicatie ligt zo laag mogelijk.
+\end{itemize}
 
-\section{Tjirpende Arduino's}
-De implementatie beschreven in de vorige secties, is niet afhankelijk van het precieze signaal dat de Arduino's geven. Het is alleen afhankelijk van het moment waarop het signaal uitgezonden en ontvangen wordt, en de tijd hiertussen mag niet exorbitant groot worden of wisselend lang en kort duren.
+\section{Radiosynchronisatie}\label{sec:radiosync}
 
-In plaats van een radiosignaal kunnen ook andere signalen uitgewisseld worden, bijvoorbeeld een geluidssignaal. De implementatie hiervan heeft wel wat meer voeten in de aarde, omdat er erg veel ruis is. Tevens heeft de Arduino niet een standaardimplementatie die "pieken" kan detecteren; er is dus functie voor microfoons die vergelijkbaar is met \texttt{radio.available()}.
+\section{Tjirpende Arduino's}\label{sec:geluidssec}
+De implementatie beschreven in de vorige secties is niet afhankelijk van het precieze signaal dat de Arduino's geven. Het is alleen afhankelijk van het moment waarop het signaal uitgezonden en ontvangen wordt, en de tijd hiertussen mag niet exorbitant groot worden of wisselend lang en kort duren.
+
+In plaats van een radiosignaal kunnen ook andere signalen uitgewisseld worden, bijvoorbeeld een geluidssignaal. De implementatie hiervan heeft wel wat meer voeten in de aarde, omdat er erg veel ruis is in de vorm van omgevingsgeluid. Tevens heeft de Arduino niet een standaardimplementatie die "pieken" kan detecteren; er is dus geen functie voor microfoons die vergelijkbaar is met \texttt{radio.available()}.
 
 \subsection{Analoge signaalverwerking}
-Een microfoon alleen levert geen geschikt signaal op. Het signaal is te zacht, bevat teveel ruis en is analoog. Om het door de Arduino te laten verwerken moet het signaal versterkt worden en omgezet worden naar een digitaal signaal. Dit doen we in drie stappen:
-
-\todo[inline]{TODO: Drie stappen uitwerken}
+Een microfoon levert geen geschikt signaal op dat digitaal verwerkt kan worden. Het signaal is te zacht, bevat veel ruis en is analoog. Om het door de Arduino te laten verwerken moet het signaal versterkt worden en omgezet worden naar een digitaal signaal. Dit doen we in drie stappen:
 
 \begin{itemize}
-	\item High-pass filter om ruis te filteren
-	\item Versterker
-	\item Omzetten naar digitaal (ADC)
+	\item \textit{High-pass filter:} dit filter laat alleen de tonen boven een bepaalde ondergrens door, waardoor lage omgevingsgeluiden gefilterd worden. Dit vermindert dus de hoeveelheid ruis in het signaal.
+	\item \textit{Versterker:} omdat de microfoon een zwak signaal levert, moet het versterkt worden.
+	\item \textit{Omzetten naar digitaal signaal:} met behulp van een ADC (analog to digital converter) kan het gefilterde, versterke signaal omgezet worden naar een digitale input.
 \end{itemize}
+
+Het circuit dat voor dit onderzoek gebruikt is, staat in figuur~\ref{fig:circuit}. Hierbij wordt gebruik gemaakt van de ADC die standaard beschikbaar is op de Arduino Uno, die een analoog input signaal tussen 0 en 5 volt heeft en als digitale output een getal tussen de 0 en 1024 geeft.
 
 \begin{figure}[ht!]
     \centering
     \includegraphics[width=0.8\textwidth]{high_pass_filter_circuit.png}
-    \caption{High-pass filter met versterker en ADC.}
+    \caption{High-pass filter met versterker en ADC.\\\textit{Bron: CreaTe Protobox quick reference sheet.}}
     \label{fig:circuit}
 \end{figure}
 
 
 \subsection{Signaalverwerking}
-In figuur~\ref{fig:on_off} is zichtbaar dat het versturen van een geluidssignaal een sterk wisselend inputsignaal geeft.
+In figuur~\ref{fig:on_off} is zichtbaar dat het versturen van een geluidssignaal een sterk wisselend inputsignaal geeft. We kunnen dus stellen dat als het verschil tussen twee opeenvolgende metingen erg verschilt, dat er dan zeer waarschijnlijk een signaal ontvangen wordt. Neem $v(t)$ de waarde gemeten op tijdstip $t$ zijn, dan $|v(t) - v(t+1)| > \text{threshold} \Rightarrow \text{signaal ontvangen}$.
+
+Hierbij is het van belang dat de threshold hoog genoeg gekozen wordt om ruis uit te sluiten, maar ook niet zo hoog dat signalen niet opgemerkt worden. Omdat dit moeilijk van tevoren vast te stellen is, hebben we gebruik gemaakt van een dynamische threshold gebaseerd op de gemiddelde afwijking. De gemiddelde afwijking (avgdiff) als functie van de tijd is
+
+$$\text{avgdiff}(t+1) = 0.1\times |v(t) - v(t+1)| + 0.9\times\text{avgdiff}(t)$$
+
+Dit is dus een gemiddelde van de afwijkingen tussen metingen, waarbij het "gewicht" van een meting exponentieel snel afneemt. De eerste meting telt dus vrijwel niet mee, en de laatste meting relatief zwaar (10\%). De threshold is $3\cdot\text{avgdiff}$: als metingen meer dan drie keer zoveel verschillen als gemiddeld, gaan we ervanuit dat er een signaal ontvangen wordt.
+
 \begin{figure}[ht!]
     \centering
     \includegraphics[width=0.8\textwidth]{resonance_on_off_commit_ff82f.png}
@@ -75,6 +90,10 @@ In figuur~\ref{fig:on_off} is zichtbaar dat het versturen van een geluidssignaal
     \caption{Inkomend signaal bij verschillende geluidsfrequencies.}
     \label{fig:resonance}
 \end{figure}
+
+\section{Resultaten en discussie}\label{sec:resultaten}
+
+\section{Conclusie}\label{sec:conclusie}
 
 % \newpage
 % \appendix
