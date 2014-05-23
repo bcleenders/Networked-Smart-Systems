@@ -66,8 +66,8 @@ void loop(void) {
       printf("m1 %3d  --- m2 %3d\n", measure1, measure2);
     }
 
-    if(measure1 - measure2 > 15) { // ontvang signaal
-        printf("Received signal");
+    if(measure1 - measure2 > 30 || measure2 - measure1 > 30) { // ontvang signaal
+        printf("Received signal - m1 %3d  --- m2 %3d\n", measure1, measure2);
         delay(100);
         counter += 100;
         counter = timespan - (timespan-counter)/3;
