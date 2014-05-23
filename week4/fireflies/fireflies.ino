@@ -42,6 +42,9 @@ const int timespan = 3000;
 const int stepsize = 20;
 int counter = 0;
 
+int measure1 = 0;
+int measure2 = 0;
+
 void loop(void) {
     if(counter >= timespan) {
       printf("counter >= timespan\n");

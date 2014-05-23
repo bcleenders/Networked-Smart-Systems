@@ -1,0 +1,76 @@
+#include <SPI.h>
+#include "nRF24L01.h"
+#include "RF24.h"
+#include "printf.h"
+
+RF24 radio(3, 9);
+
+// Radio pipe addresses for the 2 nodes to communicate.
+const uint64_t pipe = 0xF080C090F1LL;
+
+const int led_pin = 7;
+
+void setup(void)
+{
+
+    Serial.begin(57600);
+    printf_begin();
+    pinMode(7, OUTPUT);
+
+//
+// Setup and configure rf radio
+//
+
+    radio.begin();
+
+// optionally, increase the delay between retries & # of retries
+    radio.setRetries(1,1);
+
+// optionally, reduce the payload size.  seems to
+// improve reliability
+    radio.setPayloadSize(8);
+
+    radio.openWritingPipe(pipe);
+    radio.openReadingPipe(0, pipe);
+
+    radio.startListening();
+
+    radio.printDetails();
+}
+
+const int timespan = 3000;
+const int stepsize = 20;
+int counter = 0;
+
+int measure1 = 0;
+int measure2 = 0;
+
+void loop(void) {
+    if(counter >= timespan) {
+        printf("counter >= timespan\n");
+
+// Stuur een signaal (poort 8, 1334 Hz, 100ms)
+        tone(8, 1334, 100);
+        delay(timespan - 100);
+
+// Reset de state van de machine
+        counter = 0;
+    }
+
+    measure1 = analogRead(A0);
+    delay(stepsize);
+    counter += stepsize;
+    measure2 = analogRead(A0);
+    
+    if(counter % 4 == 0) {
+      printf("m1 %3d  --- m2 %3d\n", measure1, measure2);
+    }
+
+    if(measure1 - measure2 > 15) { // ontvang signaal
+        printf("Received signal");
+        delay(100);
+        counter += 100;
+        counter = timespan - (timespan-counter)/3;
+    }
+}
+
