@@ -16,7 +16,7 @@
 
 
 %opening
-\title{Betrouwbare end-to-end communicatie}
+\title{Tijdsynchronisatie}
 \author{Patrick van Looy \& Bram Leenders}
 
 \begin{document}
@@ -25,6 +25,15 @@
 
 \section{Inleiding}
 Kijk! Een referentie! \cite{sundararaman2005clock} Wow! En hij staat ook onderaan!
+
+Om draadloze communicatie mogelijk te maken, is er tijdsynchronisatie nodig. Clocks van nodes lopen standaard vrijwel nooit gelijk. Willen verschillende nodes naar elkaar kunnen versturen, dan moeten ze elkaars berichten ACK-en met een daarin een timestamp. Dit vereist wel dat op de nodes die met elkaar communiceren de tijd gelijk moet lopen.
+
+Tijdsynchronisatie kun je op verschillende manieren implementeren. In dit geval gaan we een verschijnsel nabootsen wat we in de natuur ook kunnen vinden. De voorbeelden die hierbij gehanteerd worden, zijn vuurvliegjes en krekels. Vuurvliegjes willen van nature synchroon knipperen. Dit kunnen wij met Arduinos ook implementeren. Tevens kunnen we ook met geluid gaan werken, zoals krekels dat doen door te tjirpen.
+
+Voordat we onze implementatie kunnen maken, zullen we eerst wat gerelateerd werk moeten bestuderen om ons probleem op te lossen. Hierna zullen we een algoritme gaan schrijven en deze testen met Arduinos.
+
+\section{Probleemstelling}
+Dit is een probleem!
 
 
 \section{Tjirpende Arduino's}
