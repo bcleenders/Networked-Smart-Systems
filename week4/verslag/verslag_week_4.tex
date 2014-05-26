@@ -28,12 +28,10 @@ Om energiezuinige draadloze communicatie mogelijk te maken, is er tijdsynchronis
 
 Tijdsynchronisatie kan op verschillende manieren geimplementeerd worden. In dit onderzoek gaan we een verschijnsel nabootsen wat we in de natuur ook kunnen vinden. De voorbeelden die hierbij gehanteerd worden, zijn vuurvliegjes en krekels. Vuurvliegjes, bijvoorbeeld, willen van nature synchroon knipperen\cite{buck1988synchronous}. Ditzelfde gedrag kan door Arduino's nagebootst worden, met behulp van radio- of geluidssignalen.
 
-In dit onderzoek kijken we naar een specifiek algoritme, het firefly algoritme\cite{leidenfrost2009firefly, yang2013firefly}. Dit algoritme implementeren we zowel voor radiocommunicatie als voor communicatie met behulp van geluid. In sectie~\ref{sec:probleemstelling} geven we een kort overzicht van eisen waaraan het protocol dient te voldoen. Sectie~\ref{sec:radiosync} beschrijft de implementatie voor radiocommunicatie, en sectie~\ref{sec:geluidssec} beschrijft dit voor synchronisatie met behulp van geluid. In sectie~\ref{sec:resultaten} wordt besproken hoe de beide implemenaties functioneren, en geven we een korte discussie over de beide manieren van synchronisatie.
+In dit onderzoek kijken we naar het Meshed Emergent Firefly Algorithm\cite{tyrrell2010emergent}, een variant op het firefly algoritme\cite{leidenfrost2009firefly, yang2013firefly}. Dit algoritme implementeren we zowel voor radiocommunicatie als voor communicatie met behulp van geluid. In sectie~\ref{sec:probleemstelling} geven we een kort overzicht van eisen waaraan het protocol dient te voldoen. Sectie~\ref{sec:radiosync} beschrijft de implementatie voor radiocommunicatie, en sectie~\ref{sec:geluidssec} beschrijft dit voor synchronisatie met behulp van geluid. In sectie~\ref{sec:resultaten} wordt besproken hoe de beide implemenaties functioneren, en geven we een korte discussie over de beide manieren van synchronisatie.
 
 \section{Probleemstelling}\label{sec:probleemstelling}
-Dit is een probleem!
-
-Eisen:
+Voor het synchroniseren van Arduino's is een synchronisatiealgoritme nodig. Het algoritme en de implementatie dienen aan de volgende eisen te voldoen:
 \begin{itemize}
     \item Nodes kunnen uit een groep verdwijnen zonder rest te beinvloeden.
     \item Nodes kunnen toegevoegd worden aan een groep, en het geheel synchroniseert.
@@ -42,7 +40,22 @@ Eisen:
     \item Frequentie van communicatie ligt zo laag mogelijk.
 \end{itemize}
 
+Uit deze eisen volgt dat er geen master-slave configuratie mogelijk is, omdat de master uit de groep kan verdwijnen. Er is een peer-to-peer configuratie nodig, waarbij iedere node gelijk is.
+
+Kunnen we een synchronisatiealgoritme implementeren dat aan de eisen voldoet en volgens de genoemde configuratie werkt?
+
+\section{Gerelateerd werk}
+Patrick
+\cite{tyrrell2010emergent}
+Wat staat hier in: 
+http://ieeexplore.ieee.org/stamp/stamp.jsp?tp=&arnumber=5374406
+
+https://mobile.aau.at/publications/tyrrell-2006-minema-firefly.pdf
+
+
 \section{Radiosynchronisatie}\label{sec:radiosync}
+Patrick
+\todo[inline]{dit is niet af :(}
 
 \section{Tjirpende Arduino's}\label{sec:geluidssec}
 De implementatie beschreven in de vorige secties is niet afhankelijk van het precieze signaal dat de Arduino's geven. Het is alleen afhankelijk van het moment waarop het signaal uitgezonden en ontvangen wordt, en de tijd hiertussen mag niet exorbitant groot worden of wisselend lang en kort duren.
@@ -67,16 +80,17 @@ Het circuit dat voor dit onderzoek gebruikt is, staat in figuur~\ref{fig:circuit
     \label{fig:circuit}
 \end{figure}
 
-
 \subsection{Signaalverwerking}
 In figuur~\ref{fig:on_off} is zichtbaar dat het versturen van een geluidssignaal een sterk wisselend inputsignaal geeft. We kunnen dus stellen dat als het verschil tussen twee opeenvolgende metingen erg verschilt, dat er dan zeer waarschijnlijk een signaal ontvangen wordt. Neem $v(t)$ de waarde gemeten op tijdstip $t$ zijn, dan $|v(t) - v(t+1)| > \text{threshold} \Rightarrow \text{signaal ontvangen}$.
 
 Hierbij is het van belang dat de threshold hoog genoeg gekozen wordt om ruis uit te sluiten, maar ook niet zo hoog dat signalen niet opgemerkt worden. Omdat dit moeilijk van tevoren vast te stellen is, hebben we gebruik gemaakt van een dynamische threshold gebaseerd op de gemiddelde afwijking. De gemiddelde afwijking (avgdiff) als functie van de tijd is
 
-$$\text{avgdiff}(t+1) = 0.1\times |v(t) - v(t+1)| + 0.9\times\text{avgdiff}(t)$$
+$$\text{avgdiff}(t+1) = 0.1\cdot |v(t) - v(t+1)| + 0.9\cdot\text{avgdiff}(t)$$
 
 Dit is dus een gemiddelde van de afwijkingen tussen metingen, waarbij het "gewicht" van een meting exponentieel snel afneemt. De eerste meting telt dus vrijwel niet mee, en de laatste meting relatief zwaar (10\%). De threshold is $3\cdot\text{avgdiff}$: als metingen meer dan drie keer zoveel verschillen als gemiddeld, gaan we ervanuit dat er een signaal ontvangen wordt.
 
+\section{Resultaten en discussie}\label{sec:resultaten}
+Bram
 \begin{figure}[ht!]
     \centering
     \includegraphics[width=0.8\textwidth]{resonance_on_off_commit_ff82f.png}
@@ -90,10 +104,13 @@ Dit is dus een gemiddelde van de afwijkingen tussen metingen, waarbij het "gewic
     \caption{Inkomend signaal bij verschillende geluidsfrequencies.}
     \label{fig:resonance}
 \end{figure}
-
-\section{Resultaten en discussie}\label{sec:resultaten}
+Het werkt
+Microfoon veel last omgevingsgeluid; hogere frequentie?
+Radiosync werkt goed; weinig ruis en op grote(re) afstand beschikbaar.
 
 \section{Conclusie}\label{sec:conclusie}
+Bram
+Concluderend, we hebben succesvol een algoritme kunnen maken en deze geïmplementeerd op onze Arduino's. 
 
 % \newpage
 % \appendix
