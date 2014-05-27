@@ -50,7 +50,7 @@ Uit deze eisen volgt dat er geen master-slave configuratie mogelijk is, omdat de
 Kunnen we een synchronisatiealgoritme implementeren dat aan de eisen voldoet en volgens de genoemde configuratie werkt?
 
 \section{Gerelateerd werk}
-De brede toepasbaarheid van draadloze (sensor)netwerken heeft er voor gezorgd dat er al veel onderzoek naar synchronisatie gedaan is. Ook in ons geval is er al veel met het Firefly-algoritme geëxperimenteerd. Gezien de toepasbaarheid in grotere draadloze netwerken (zie bijvoorbeeld~\cite{tyrrell2010emergent}), is er veel getest op de invloed van transmissie delay en de beperking dat een node niet tegelijkertijd kan zenden en ontvangen. Voor netwerken die een groot oppervlak overspannen kunnen deze factoren een beperking zijn.
+De brede toepasbaarheid van draadloze (sensor)netwerken heeft er voor gezorgd dat er al veel onderzoek naar synchronisatie gedaan is. Ook in ons geval is er al veel met het Firefly-algoritme ge\"experimenteerd. Gezien de toepasbaarheid in grotere draadloze netwerken (zie bijvoorbeeld~\cite{tyrrell2010emergent}), is er veel getest op de invloed van transmissie delay en de beperking dat een node niet tegelijkertijd kan zenden en ontvangen. Voor netwerken die een groot oppervlak overspannen kunnen deze factoren een beperking zijn.
 
 Zoals gezegd in sectie~\ref{sec:probleemstelling} moet het netwerk zichzelf kunnen organiseren. Heel simpel gezegd bestaat het netwerk uit een heleboel kleine, op zichzelf staande entiteiten die simpele gedragsregels kennen. Ze hebben elk een beperkt lokaal zicht op het netwerk, en vormen samen het netwerk. Dit grote systeem is adaptief waardoor veranderingen in het netwerk geen problemen voor het netwerk in zijn geheel opleveren. Tevens is het netwerk volledig schaalbaar.
 
@@ -153,7 +153,7 @@ Zoals al gezegd in sectie~\ref{sec:geluidssec} heeft de microfoon erg veel stori
 
 Het gebruikte algoritme wordt niet gestoord door false negatives (het niet ontvangen van een signaal). Bij een false negative duurt de synchronisatie iets langer, maar wordt de reeds behaalde synchronisatie niet gestoord.
 
-Bij een flase positive (ruis dat wordt herkend als signaal) is dat niet het geval. Als alle nodes perfect synchroon zouden lopen \'en allemaal de false positive ontvangen worden ze niet verstoord, omdat iedere node dan dezelfde tijd opschuift. Echter, in de praktijk ontvangt slechts een deel van de nodes het signaal en wordt de groep verstoord.
+Bij een false positive (ruis dat wordt herkend als signaal) is dat niet het geval. Als alle nodes perfect synchroon zouden lopen \'en allemaal de false positive ontvangen worden ze niet verstoord, omdat iedere node dan dezelfde tijd opschuift. Echter, in de praktijk ontvangt slechts een deel van de nodes het signaal en wordt de groep verstoord.
 
 We kunnen hier dus uit afleiden dat de threshold vrij hoog moet staan: het is beter om een aantal signalen te missen dan om ruis aan te zien voor een signaal. Tijdens de tests bleek een factor $n=3$ een optimaal resultaat te geven in onze ruimte. Een hogere factor filterde alle echte signalen, en een lagere factor liet de ruis door.
 
@@ -165,7 +165,7 @@ Helaas kon onze opstelling geen hoogfrequente signalen testen; alle pulsen lagen
 \section{Conclusie}\label{sec:conclusie}
 In dit onderzoek zijn twee implementaties van het Meshed Emergent Firefly Synchronization algoritme getest. In de resultaten was duidelijk terug te zien dat de radiosynchronisatie minder last ondervindt van ruis. Op basis van onze resultaten raden we dus aan om een radio te gebruiken, mits hiervoor genoeg stroom is. In een stille omgeving, waarbij weinig ruis is, kan ook voor geluidssynchronisatie gekozen worden.
 
-Dit onderzoek heeft slechts twee mogelijke implementaties onderzocht, een later onderzoek zou alternatieve signalen zoals licht kunnen onderzoeken. Tevens gebruiken onze implementaties een pulsefrequentie. Het zou interessant zijn om te onderzoeken of de pulsefrequentie verlaagd kan worden wanneer het netwerk gesynchroniseerd is; dit zou het energieverbruik misschien nog verder kunnen verlagen.
+Dit onderzoek heeft slechts twee mogelijke implementaties onderzocht, een later onderzoek zou alternatieve signalen zoals licht kunnen onderzoeken. Tevens gebruiken onze implementaties een pulsfrequentie. Het zou interessant zijn om te onderzoeken of de pulsfrequentie verlaagd kan worden wanneer het netwerk gesynchroniseerd is; dit zou het energieverbruik misschien nog verder kunnen verlagen.
 
 % \newpage
 % \appendix
