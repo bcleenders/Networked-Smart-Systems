@@ -59,8 +59,11 @@ Het firefly-algoritme~\cite{yang2013firefly} is op dit principe gebaseerd. Dit a
 Gelukkig is hiervoor een alternatief beschikbaar, namelijk het Meshed Emergent Firefly Synchronization (MEMFIS) algoritme~\cite{tyrrell2010emergent}. Dit algoritme houdt rekening met de technologische beperkingen van draadloze netwerken met behoud van de eigenschappen van firefly synchronisatie. Een belangrijk kenmerk van het ontwerp is dat er een gemeenschappelijk synchronisatiewoord is ingebed in elk payload packet. Dit synschonisatiewoord wordt gedetecteerd bij de ontvanger door gebruik te maken van een cross-correlator. Delays worden afgehandeld door het synchronisatiealgoritme te verbeteren. Het resultaat is dat synchronisatie geleidelijk ontstaat als nodes onderling willekeurig pakketen uitwisselen. Hierdoor is er ook geen speciale synchornisatiefase nodig.
 
 \section{Radiosynchronisatie}\label{sec:radiosync}
+Om tijdsynchronisatie op Arduinos uit te kunnen voeren, is een middel nodig waarmee dat gedaan wordt. In dit geval gebruiken we hier een radio voor. Hierdoor kunnen de Arduinos onderling met elkaar communiceren. Op deze manier kunnen ze synchroon gaan lopen door elkaar te informeren over hun status.
 
-\section{Geluidssynschronisatie}\label{sec:geluidssec}
+Onze Arduinos zijn allemaal met een ledje uitgerust om zo een firefly na te bootsen. De frequentie van het knipperen van een ledje is vantevoren vastgelegd. Telkens wanneer een node zijn ledje laat knipperen, zend deze een radiosignaal uit. Wanneer andere nodes deze oppikken (dus in hun luisterfase zitten), zullen zij zich de volgende ronde hierop aanpassen volgens het algoritme. Na enige tijd zullen de Arduinos nagenoeg synchroon hun ledje laten knipperen.
+
+\section{Geluidssynchronisatie}\label{sec:geluidssec}
 De implementatie beschreven in de vorige secties is niet afhankelijk van het precieze signaal dat de Arduino's geven. Het is alleen afhankelijk van het moment waarop het signaal uitgezonden en ontvangen wordt, en de tijd hiertussen mag niet exorbitant groot worden of wisselend lang en kort duren.
 
 In plaats van een radiosignaal kunnen ook andere signalen uitgewisseld worden, bijvoorbeeld een geluidssignaal. De implementatie hiervan heeft wel wat meer voeten in de aarde, omdat er erg veel ruis is in de vorm van omgevingsgeluid. Tevens heeft de Arduino niet een standaardimplementatie die "pieken" kan detecteren; er is dus geen functie voor microfoons die vergelijkbaar is met \texttt{radio.available()}.
