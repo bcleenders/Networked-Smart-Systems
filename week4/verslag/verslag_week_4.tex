@@ -28,10 +28,12 @@ Om energiezuinige draadloze communicatie mogelijk te maken, is er tijdsynchronis
 
 Tijdsynchronisatie kan op verschillende manieren geimplementeerd worden. In dit onderzoek gaan we een verschijnsel nabootsen wat we in de natuur ook kunnen vinden. De voorbeelden die hierbij gehanteerd worden, zijn vuurvliegjes en krekels. Vuurvliegjes, bijvoorbeeld, willen van nature synchroon knipperen\cite{buck1988synchronous}. Ditzelfde gedrag kan door Arduino's nagebootst worden, met behulp van radio- of geluidssignalen.
 
-In dit onderzoek kijken we naar het Meshed Emergent Firefly Algorithm\cite{tyrrell2010emergent}, een variant op het firefly algoritme\cite{leidenfrost2009firefly, yang2013firefly}. Dit algoritme implementeren we zowel voor radiocommunicatie als voor communicatie met behulp van geluid. In sectie~\ref{sec:probleemstelling} geven we een kort overzicht van eisen waaraan het protocol dient te voldoen. Sectie~\ref{sec:radiosync} beschrijft de implementatie voor radiocommunicatie, en sectie~\ref{sec:geluidssec} beschrijft dit voor synchronisatie met behulp van geluid. In sectie~\ref{sec:resultaten} wordt besproken hoe de beide implemenaties functioneren, en geven we een korte discussie over de beide manieren van synchronisatie.
+In dit onderzoek kijken we naar een specifiek algoritme, het firefly algoritme\cite{leidenfrost2009firefly, yang2013firefly}. Dit algoritme implementeren we zowel voor radiocommunicatie als voor communicatie met behulp van geluid. In sectie~\ref{sec:probleemstelling} geven we een kort overzicht van eisen waaraan het protocol dient te voldoen. Sectie~\ref{sec:radiosync} beschrijft de implementatie voor radiocommunicatie, en sectie~\ref{sec:geluidssec} beschrijft dit voor synchronisatie met behulp van geluid. In sectie~\ref{sec:resultaten} wordt besproken hoe de beide implemenaties functioneren, en geven we een korte discussie over de beide manieren van synchronisatie.
 
 \section{Probleemstelling}\label{sec:probleemstelling}
-Voor het synchroniseren van Arduino's is een synchronisatiealgoritme nodig. Het algoritme en de implementatie dienen aan de volgende eisen te voldoen:
+Dit is een probleem!
+
+Eisen:
 \begin{itemize}
     \item Nodes kunnen uit een groep verdwijnen zonder rest te beinvloeden.
     \item Nodes kunnen toegevoegd worden aan een groep, en het geheel synchroniseert.
@@ -40,31 +42,18 @@ Voor het synchroniseren van Arduino's is een synchronisatiealgoritme nodig. Het 
     \item Frequentie van communicatie ligt zo laag mogelijk.
 \end{itemize}
 
-Uit deze eisen volgt dat er geen master-slave configuratie mogelijk is, omdat de master uit de groep kan verdwijnen. Er is een peer-to-peer configuratie nodig, waarbij iedere node gelijk is.
-
-Kunnen we een synchronisatiealgoritme implementeren dat aan de eisen voldoet en volgens de genoemde configuratie werkt?
-
-\section{Gerelateerd werk}
-Patrick
-\cite{tyrrell2010emergent}
-Wat staat hier in: 
-http://ieeexplore.ieee.org/stamp/stamp.jsp?tp=&arnumber=5374406
-
-https://mobile.aau.at/publications/tyrrell-2006-minema-firefly.pdf
-
+\section{Verwante literatuur}
+Noem \cite{lucarelli2004decentralized} even; die bewijzen dat het netwerk convergeert.
 
 \section{Radiosynchronisatie}\label{sec:radiosync}
-Patrick
-\todo[inline]{dit is niet af :(}
 
-\section{Tjirpende Arduino's}\label{sec:geluidssec}
+\section{Geluidssynschronisatie}\label{sec:geluidssec}
 De implementatie beschreven in de vorige secties is niet afhankelijk van het precieze signaal dat de Arduino's geven. Het is alleen afhankelijk van het moment waarop het signaal uitgezonden en ontvangen wordt, en de tijd hiertussen mag niet exorbitant groot worden of wisselend lang en kort duren.
 
 In plaats van een radiosignaal kunnen ook andere signalen uitgewisseld worden, bijvoorbeeld een geluidssignaal. De implementatie hiervan heeft wel wat meer voeten in de aarde, omdat er erg veel ruis is in de vorm van omgevingsgeluid. Tevens heeft de Arduino niet een standaardimplementatie die "pieken" kan detecteren; er is dus geen functie voor microfoons die vergelijkbaar is met \texttt{radio.available()}.
 
 \subsection{Analoge signaalverwerking}
 Een microfoon levert geen geschikt signaal op dat digitaal verwerkt kan worden. Het signaal is te zacht, bevat veel ruis en is analoog. Om het door de Arduino te laten verwerken moet het signaal versterkt worden en omgezet worden naar een digitaal signaal. Dit doen we in drie stappen:
-
 \begin{itemize}
 	\item \textit{High-pass filter:} dit filter laat alleen de tonen boven een bepaalde ondergrens door, waardoor lage omgevingsgeluiden gefilterd worden. Dit vermindert dus de hoeveelheid ruis in het signaal.
 	\item \textit{Versterker:} omdat de microfoon een zwak signaal levert, moet het versterkt worden.
@@ -76,41 +65,51 @@ Het circuit dat voor dit onderzoek gebruikt is, staat in figuur~\ref{fig:circuit
 \begin{figure}[ht!]
     \centering
     \includegraphics[width=0.8\textwidth]{high_pass_filter_circuit.png}
-    \caption{High-pass filter met versterker en ADC.\\\textit{Bron: CreaTe Protobox quick reference sheet.}}
+    \caption{High-pass filter met versterker en ADC. \textit{Bron: CreaTe Protobox quick reference sheet.}}
     \label{fig:circuit}
 \end{figure}
+
 
 \subsection{Signaalverwerking}
 In figuur~\ref{fig:on_off} is zichtbaar dat het versturen van een geluidssignaal een sterk wisselend inputsignaal geeft. We kunnen dus stellen dat als het verschil tussen twee opeenvolgende metingen erg verschilt, dat er dan zeer waarschijnlijk een signaal ontvangen wordt. Neem $v(t)$ de waarde gemeten op tijdstip $t$ zijn, dan $|v(t) - v(t+1)| > \text{threshold} \Rightarrow \text{signaal ontvangen}$.
 
 Hierbij is het van belang dat de threshold hoog genoeg gekozen wordt om ruis uit te sluiten, maar ook niet zo hoog dat signalen niet opgemerkt worden. Omdat dit moeilijk van tevoren vast te stellen is, hebben we gebruik gemaakt van een dynamische threshold gebaseerd op de gemiddelde afwijking. De gemiddelde afwijking (avgdiff) als functie van de tijd is
 
-$$\text{avgdiff}(t+1) = 0.1\cdot |v(t) - v(t+1)| + 0.9\cdot\text{avgdiff}(t)$$
+$$\text{avgdiff}(t+1) = 0.1\times |v(t) - v(t+1)| + 0.9\times\text{avgdiff}(t)$$
 
-Dit is dus een gemiddelde van de afwijkingen tussen metingen, waarbij het "gewicht" van een meting exponentieel snel afneemt. De eerste meting telt dus vrijwel niet mee, en de laatste meting relatief zwaar (10\%). De threshold is $3\cdot\text{avgdiff}$: als metingen meer dan drie keer zoveel verschillen als gemiddeld, gaan we ervanuit dat er een signaal ontvangen wordt.
+Dit is dus een gemiddelde van de afwijkingen tussen metingen, waarbij het "gewicht" van een meting exponentieel snel afneemt. De eerste meting telt dus vrijwel niet mee, en de laatste meting relatief zwaar (10\%). De threshold is $n\cdot\text{avgdiff}$: als het verschil tussen metingen meer dan een factor $n$ verschillen ten opzichte van de gemiddelde afwijking, gaan we ervanuit dat er een signaal ontvangen wordt.
 
-\section{Resultaten en discussie}\label{sec:resultaten}
-Bram
 \begin{figure}[ht!]
     \centering
     \includegraphics[width=0.8\textwidth]{resonance_on_off_commit_ff82f.png}
-    \caption{Inkomend signaal bij pulserend signaal.}
+    \caption{Inkomend signaal bij pulserend signaal (van speakers; niet van Arduino).}
     \label{fig:on_off}
 \end{figure}
 
 \begin{figure}[ht!]
     \centering
     \includegraphics[width=0.8\textwidth]{resonance_2_frequencies_commit_ff82f.png}
-    \caption{Inkomend signaal bij verschillende geluidsfrequencies.}
+    \caption{Inkomend signaal bij verschillende geluidsfrequencies (van speakers; niet van Arduino).}
     \label{fig:resonance}
 \end{figure}
-Het werkt
-Microfoon veel last omgevingsgeluid; hogere frequentie?
-Radiosync werkt goed; weinig ruis en op grote(re) afstand beschikbaar.
+
+\section{Resultaten en discussie}\label{sec:resultaten}
+\subsection{Resultaten radiosynchronisatie}
+De radiosynchronisatie is erg efficient; bij een groep van twee nodes halveert het tijdsverschil per synchronisatieronde. Bij grotere groepen nodes is het moeilijker om een constante verbetering te voorspellen. Lucarelli en Wang\cite{lucarelli2004decentralized} hebben bewezen dat een netwerk dat gebruik maakt van het firefly algoritme leidt tot een convergentie.
+
+\subsection{Resultaten geluidssynschronisatie}
+Zoals al gezegd in sectie~\ref{sec:geluidssec} heeft de microfoon erg veel storing van omgevingsgeluid, zoals pratende mensen of rijdende auto's.
+
+Het gebruikte algoritme wordt niet gestoord door false negatives (het niet ontvangen van een signaal). Bij een false negative duurt de synchronisatie iets langer, maar wordt de reeds behaalde synchronisatie niet gestoord.
+
+Bij een flase positive (ruis dat wordt herkend als signaal) is dat niet het geval. Als alle nodes perfect synchroon zouden lopen \'en allemaal de false positive ontvangen worden ze niet verstoord, omdat iedere node dan dezelfde tijd opschuift. Echter, in de praktijk ontvangt slechts een deel van de nodes het signaal en wordt de groep verstoord.
+
+We kunnen hier dus uit afleiden dat de threshold vrij hoog moet staan: het is beter om een aantal signalen te missen dan om ruis aan te zien voor een signaal. Tijdens de tests bleek een factor $n=3$ een optimaal resultaat te geven in onze ruimte. Een hogere factor filterde alle echte signalen, en een lagere factor liet de ruis door.
 
 \section{Conclusie}\label{sec:conclusie}
-Bram
-Concluderend, we hebben succesvol een algoritme kunnen maken en deze geïmplementeerd op onze Arduino's. 
+In dit onderzoek zijn twee implementaties van het Meshed Emergent Firefly Synchronization algoritme getest. In de resultaten was duidelijk terug te zien dat de radiosynchronisatie minder last ondervindt van ruis. Op basis van onze resultaten raden we dus aan om een radio te gebruiken, mits hiervoor genoeg stroom is.
+
+Dit onderzoek heeft slechts twee mogelijke implementaties onderzocht, een later onderzoek zou alternatieve signalen zoals licht kunnen onderzoeken. Tevens gebruiken onze implementaties een pulsefrequentie. Het zou interessant zijn om te onderzoeken of de pulsefrequentie verlaagd kan worden wanneer het netwerk gesynchroniseerd is; dit zou het energieverbruik misschien nog verder kunnen verlagen.
 
 % \newpage
 % \appendix
