@@ -61,12 +61,16 @@ In feite zijn er een aantal mogelijkheden om een synchronisatiestrategie te bede
 
 Het firefly-algoritme is ook op dit principe gebaseerd. Dit algoritme gaat er vanuit dat synchronisatie pulsen oneindig kort zijn, er geen delays zijn, nodes tegelijkertijd kunnen luisteren en versturen en dat alle nodes samen een compleet netwerk vormen. Waarneer er aan een of meerdere van deze aannames niet voldaan wordt, is synchronsatie onstabiel. Hierdoor is het onhaalbaar om dit een op een door te zetten naar draadloze systemen. Een voorbeeld waarom het niet zou kunnen werken is dat als er delays zijn, het mogelijk is dat nodes "echos" ontvangen van hun eigen puls.
 
-Gelukkig is hiervoor een alternatief beschikbaar, namelijk het Meshed Emergent Firefly Synchronization (MEMFIS) algoritme. Dit algoritme houdt rekening met de technologische beperkingen van draadloze netwerken met behoud van de eigenschappen van firefly synchronisatie. Een belangrijk kenmerk van het ontwerp is dat er een gemeenschappelijk synchronisatiewoord is ingebed in elk payload packet. Dit synschonisatiewoord wordt gedetecteerd bij de ontvanger door gebruik te maken van een cross-correlator. Delays worden afgehandeld door het synchronisatiealgoritme te verbeteren. Het resultaat is dat synchronisatie geleidelijk ontstaat als nodes onderling willekeurig pakketen uitwisselen. Hierdoor is er ook geen speciale synchornisatiefase nodig.
+Gelukkig is hiervoor een alternatief beschikbaar, namelijk het Meshed Emergent Firefly Synchronization (MEMFIS) algoritme. Dit algoritme houdt rekening met de technologische beperkingen van draadloze netwerken met behoud van de eigenschappen van firefly synchronisatie. Een belangrijk kenmerk van het ontwerp is dat er een gemeenschappelijk synchronisatiewoord is ingebed in elk payload packet. Dit synschonisatiewoord wordt gedetecteerd bij de ontvanger door gebruik te maken van een cross-correlator. Delays worden afgehandeld door het synchronisatiealgoritme te verbeteren. Het resultaat is dat   geleidelijk ontstaat als nodes onderling willekeurig pakketen uitwisselen. Hierdoor is er ook geen speciale synchornisatiefase nodig.
 
 
 \section{Radiosynchronisatie}\label{sec:radiosync}
 Patrick
 \todo[inline]{dit is niet af :(}
+
+Om tijdsynchronisatie op Arduinos uit te kunnen voeren, is een middel nodig waarmee dat gedaan wordt. In dit geval gebruiken we hier een radio voor. Hierdoor kunnen de Arduinos onderling met elkaar communiceren. Op deze manier kunnen ze synchroon gaan lopen door elkaar te informeren over hun status.
+
+Onze Arduinos zijn allemaal met een ledje uitgerust om zo een firefly na te bootsen. De frequentie van het knipperen van een ledje is vantevoren vastgelegd. Telkens wanneer een node zijn ledje laat knipperen, zend deze een radiosignaal uit. Wanneer andere nodes deze oppikken (dus in hun luisterfase zitten), zullen zij zich de volgende ronde hierop aanpassen volgens het algoritme. Na enige tijd zullen de Arduinos nagenoeg synchroon hun ledje laten knipperen.
 
 \section{Tjirpende Arduino's}\label{sec:geluidssec}
 De implementatie beschreven in de vorige secties is niet afhankelijk van het precieze signaal dat de Arduino's geven. Het is alleen afhankelijk van het moment waarop het signaal uitgezonden en ontvangen wordt, en de tijd hiertussen mag niet exorbitant groot worden of wisselend lang en kort duren.
