@@ -1,3 +1,4 @@
+
 \documentclass[a4paper,10pt]{article}
 \usepackage[utf8]{inputenc}
 \usepackage{amstext}
@@ -16,7 +17,7 @@
 
 
 %opening
-\title{Tijdsynchronisatie}
+\title{Tijdsynchronisatie met Arduinos}
 \author{Patrick van Looy \& Bram Leenders}
 
 \begin{document}
@@ -51,6 +52,16 @@ Wat staat hier in:
 http://ieeexplore.ieee.org/stamp/stamp.jsp?tp=&arnumber=5374406
 
 https://mobile.aau.at/publications/tyrrell-2006-minema-firefly.pdf
+
+De vele toepassingen van draadloze (sensor)netwerken heeft er voor gezorgd dat er al veel onderzoek naar gedaan is. Ook in ons geval is er al veel met het Firefly-algoritme geëxperimenteerd. Gezien de toepasbaarheid in grotere draadloze netwerken, is er veel getest op het gebied van transmissie delay en het feit dat een node niet tegelijkertijd kan zenden en ontvangen.
+
+Daarnaast moet het netwerk zichzelf kunnen organiseren. Heel simpel gezegd bestaat het netwerk uit een heleboel kleine, op zichzelf staande entiteiten die simpele gedragsregels kennen. Ze hebben elk een beperkt lokaal zicht op het netwerk. Al deze kleine entiteiten vormen samen het netwerk. Dit grote systeem is adaptief waardoor veranderingen in het netwerk geen problemen voor het netwerk in zijn geheel opleveren. Tevens is het netwerk volledig schaalbaar.
+
+In feite zijn er een aantal mogelijkheden om een synchronisatiestrategie te bedenken voor zo'n netwerk. Er kan gekozen worden voor een master-slave implementatie, mutual synchronization of een combinatie van die twee. In de echte wereld kennen we dit als een monarchie, een democratie of een oligarchie. Een voorbeeld van een master-slave implementatie is bijvoorbeeld het Berkeley algoritme dat wordt gebruikt in LAN-synchronisatie. Waar wij naartoe willen is een implementatie van het tweede principe; mutual synchronization.
+
+Het firefly-algoritme is ook op dit principe gebaseerd. Dit algoritme gaat er vanuit dat synchronisatie pulsen oneindig kort zijn, er geen delays zijn, nodes tegelijkertijd kunnen luisteren en versturen en dat alle nodes samen een compleet netwerk vormen. Waarneer er aan een of meerdere van deze aannames niet voldaan wordt, is synchronsatie onstabiel. Hierdoor is het onhaalbaar om dit een op een door te zetten naar draadloze systemen. Een voorbeeld waarom het niet zou kunnen werken is dat als er delays zijn, het mogelijk is dat nodes "echos" ontvangen van hun eigen puls.
+
+Gelukkig is hiervoor een oplossing beschikbaar, namelijk het Meshed Emergent Firefly Synchronization (MEMFIS) algoritme. Dit algoritme houdt rekening met de technologische beperkingen van draadloze netwerken met behoud van de eigenschappen van firefly synchronisatie. Een belangrijk kenmerk van het ontwerp is dat er een gemeenschappelijk synchronisatiewoord is ingebed in elk payload packet. Dit synschonisatiewoord wordt gedetecteerd bij de ontvanger door gebruik te maken van een cross-correlator. Delays worden afgehandeld door het synchronisatiealgoritme te verbeteren. Het resultaat is dat synchronisatie geleidelijk ontstaat als nodes onderling willekeurig pakketen uitwisselen. Hierdoor is er ook geen speciale synchornisatiefase nodig.
 
 
 \section{Radiosynchronisatie}\label{sec:radiosync}
