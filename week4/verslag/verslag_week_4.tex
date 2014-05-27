@@ -63,24 +63,31 @@ Gelukkig is hiervoor een alternatief beschikbaar, namelijk het Meshed Emergent F
 
 \section{Implementatie}
 \subsection{Algoritme}\label{sec:alg}
-\todo[inline]{Hoe werkt ons algoritme?}
+Het gebruikte algoritme lijkt op het firefly algoritme: het is een homogeen peer-to-peer netwerk. Er zijn dus geen masters of slaves, maar iedere node reageert op de signalen van alle omliggende nodes. 
+
+Iedere ronde wacht een node eerst een bepaalde tijd, en stuurt daarna een signaal. Als de node een signaal ontvangt halveert hij de tijd tot het zenden. Om te voorkomen dat twee nodes elkaar triggeren, begint iedere ronde met een halve periode slaap. Deze halve periode, waarin de node niet reageert op signalen, wordt de refractory period genoemd.
 
 \begin{algorithm}
-\begin{algorithmic}
-\Loop
-    \If{$t \geq periode$}
-        \State Stuur signaal
-        \State $t \gets 0$
-        \State \Call{Sleep}{$\frac{1}{2}$ periode}
-    \EndIf
-    \If{Signaal ontvangen}
-        \State $t \gets periode - \frac{1}{2} (periode - t)$
-    \EndIf
-    \State \Call{Sleep}{stapgrootte}
-    \State $t \gets (t + stapgrootte)$
-\EndLoop
-\end{algorithmic}
+    \begin{algorithmic}
+    \Loop
+        \If{$t \geq periode$}
+            \State \Call{Zendt_signaal}
+            \State \Call{Stop_luisteren}
+            \State \Call{Sleep}{$\frac{1}{2}$ periode}
+            \State $t \gets \frac{1}{2}$ periode
+        \EndIf
+        \If{\Call{Signaal_ontvangen}}
+            \State $t \gets periode - \frac{1}{2} (periode - t)$
+        \Else
+            \State \Call{Sleep}{stapgrootte}
+            \State $t \gets (t + stapgrootte)$
+        \EndIf
+    \EndLoop
+    \end{algorithmic}
+    \caption{Synchronisatiealgoritme}
 \end{algorithm}
+
+Dit algoritme voldoet aan de eisen die worden gesteld in de probleemstelling (sectie~\ref{sec:probleemstelling}). Idealiter halveert het tijdsverschil tussen twee nodes iedere periode. In de praktijk zal dit iets lager zijn, in verband met de verwerkingstijd en de propagatietijd.
 
 \subsection{Radiosynchronisatie}\label{sec:radiosync}
 Om tijdsynchronisatie op Arduinos uit te kunnen voeren, is een middel nodig waarmee dat gedaan wordt. In dit geval gebruiken we hier een radio voor. Hierdoor kunnen de Arduinos onderling met elkaar communiceren. Op deze manier kunnen ze synchroon gaan lopen door elkaar te informeren over hun status.
@@ -118,7 +125,6 @@ Hierbij is het van belang dat de threshold hoog genoeg gekozen wordt om ruis uit
 $$\text{avgdiff}(t+1) = 0.1\times |v(t) - v(t+1)| + 0.9\times\text{avgdiff}(t)$$
 
 Dit is dus een gemiddelde van de afwijkingen tussen metingen, waarbij het "gewicht" van een meting exponentieel snel afneemt. De eerste meting telt dus vrijwel niet mee, en de laatste meting relatief zwaar (10\%). De threshold is $n\cdot\text{avgdiff}$: als het verschil tussen metingen meer dan een factor $n$ verschillen ten opzichte van de gemiddelde afwijking, gaan we ervanuit dat er een signaal ontvangen wordt.
-
 \begin{figure}[ht!]
     \centering
     \includegraphics[width=0.7\textwidth]{resonance_on_off_commit_ff82f.png}
