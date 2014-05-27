@@ -70,12 +70,11 @@ Iedere ronde wacht een node eerst een bepaalde tijd, en stuurt daarna een signaa
     \begin{algorithmic}
     \Loop
         \If{$t \geq periode$}
-            \State \Call{Zendt_signaal}
-            \State \Call{Stop_luisteren}
+            \State \Call{Zendt signaal}{}
             \State \Call{Sleep}{$\frac{1}{2}$ periode}
             \State $t \gets \frac{1}{2}$ periode
         \EndIf
-        \If{\Call{Signaal_ontvangen}}
+        \If{\Call{Signaal ontvangen}{}}
             \State $t \gets periode - \frac{1}{2} (periode - t)$
         \Else
             \State \Call{Sleep}{stapgrootte}
@@ -101,9 +100,9 @@ In plaats van een radiosignaal kunnen ook andere signalen uitgewisseld worden, b
 \subsection{Analoge signaalverwerking}
 Een microfoon levert geen geschikt signaal op dat digitaal verwerkt kan worden. Het signaal is te zacht, bevat veel ruis en is analoog. Om het door de Arduino te laten verwerken moet het signaal versterkt worden en omgezet worden naar een digitaal signaal. Dit doen we in drie stappen:
 \begin{itemize}
-	\item \textit{High-pass filter:} dit filter laat alleen de tonen boven een bepaalde ondergrens door, waardoor lage omgevingsgeluiden gefilterd worden. Dit vermindert dus de hoeveelheid ruis in het signaal.
-	\item \textit{Versterker:} omdat de microfoon een zwak signaal levert, moet het versterkt worden.
-	\item \textit{Omzetten naar digitaal signaal:} met behulp van een ADC (analog to digital converter) kan het gefilterde, versterke signaal omgezet worden naar een digitale input.
+    \item \textit{High-pass filter:} dit filter laat alleen de tonen boven een bepaalde ondergrens door, waardoor lage omgevingsgeluiden gefilterd worden. Dit vermindert dus de hoeveelheid ruis in het signaal.
+    \item \textit{Versterker:} omdat de microfoon een zwak signaal levert, moet het versterkt worden.
+    \item \textit{Omzetten naar digitaal signaal:} met behulp van een ADC (analog to digital converter) kan het gefilterde, versterke signaal omgezet worden naar een digitale input.
 \end{itemize}
 
 Het circuit dat voor dit onderzoek gebruikt is, staat in figuur~\ref{fig:circuit}. Hierbij wordt gebruik gemaakt van de ADC die standaard beschikbaar is op de Arduino Uno, die een analoog input signaal tussen 0 en 5 volt heeft en als digitale output een getal tussen de 0 en 1024 geeft.
