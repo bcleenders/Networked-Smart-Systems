@@ -12,6 +12,9 @@
 \usepackage{float}
 \usepackage[dutch]{babel}
 \usepackage[section]{placeins}
+\usepackage{algorithm}
+\usepackage{algpseudocode}
+\usepackage{algorithmicx}
 
 \DeclareCaptionLabelFormat{andtable}{#1~#2  \&  \tablename~\thetable}
 
@@ -29,7 +32,7 @@ Om energiezuinige draadloze communicatie mogelijk te maken, is er tijdsynchronis
 
 Tijdsynchronisatie kan op verschillende manieren geimplementeerd worden. In dit onderzoek gaan we een verschijnsel nabootsen wat we in de natuur ook kunnen vinden. De voorbeelden die hierbij gehanteerd worden, zijn vuurvliegjes en krekels. Vuurvliegjes, bijvoorbeeld, willen van nature synchroon knipperen\cite{buck1988synchronous}. Ditzelfde gedrag kan door Arduino's nagebootst worden, met behulp van radio- of geluidssignalen.
 
-In dit onderzoek kijken we naar een specifiek algoritme, het firefly algoritme\cite{leidenfrost2009firefly, yang2013firefly}. Dit algoritme implementeren we zowel voor radiocommunicatie als voor communicatie met behulp van geluid. In sectie~\ref{sec:probleemstelling} geven we een kort overzicht van eisen waaraan het protocol dient te voldoen. Sectie~\ref{sec:radiosync} beschrijft de implementatie voor radiocommunicatie, en sectie~\ref{sec:geluidssec} beschrijft dit voor synchronisatie met behulp van geluid. In sectie~\ref{sec:resultaten} wordt besproken hoe de beide implemenaties functioneren, en geven we een korte discussie over de beide manieren van synchronisatie.
+In dit onderzoek kijken we naar een specifiek algoritme, het firefly algoritme\cite{leidenfrost2009firefly, yang2013firefly}. Dit algoritme implementeren we zowel voor radiocommunicatie als voor communicatie met behulp van geluid. In sectie~\ref{sec:probleemstelling} geven we een kort overzicht van eisen waaraan het protocol dient te voldoen. In sectie~\ref{sec:alg} wordt het algoritme beschreven dat hiervoor gebruikt is. Sectie~\ref{sec:radiosync} beschrijft de implementatie voor radiocommunicatie, en sectie~\ref{sec:geluidssec} beschrijft dit voor synchronisatie met behulp van geluid. In sectie~\ref{sec:resultaten} wordt besproken hoe de beide implemenaties functioneren, en geven we een korte discussie over de beide manieren van synchronisatie.
 
 \section{Probleemstelling}\label{sec:probleemstelling}
 Dit is een probleem!
@@ -58,15 +61,36 @@ Het firefly-algoritme~\cite{yang2013firefly} is op dit principe gebaseerd. Dit a
 
 Gelukkig is hiervoor een alternatief beschikbaar, namelijk het Meshed Emergent Firefly Synchronization (MEMFIS) algoritme~\cite{tyrrell2010emergent}. Dit algoritme houdt rekening met de technologische beperkingen van draadloze netwerken met behoud van de eigenschappen van firefly synchronisatie. Een belangrijk kenmerk van het ontwerp is dat er een gemeenschappelijk synchronisatiewoord is ingebed in elk payload packet. Dit synschonisatiewoord wordt gedetecteerd bij de ontvanger door gebruik te maken van een cross-correlator. Delays worden afgehandeld door het synchronisatiealgoritme te verbeteren. Het resultaat is dat synchronisatie geleidelijk ontstaat als nodes onderling willekeurig pakketen uitwisselen. Hierdoor is er ook geen speciale synchornisatiefase nodig.
 
-\section{Radiosynchronisatie}\label{sec:radiosync}
+\section{Implementatie}
+\subsection{Algoritme}\label{sec:alg}
+\todo[inline]{Hoe werkt ons algoritme?}
+
+\begin{algorithm}
+\begin{algorithmic}
+\Loop
+    \If{$t \geq periode$}
+        \State Stuur signaal
+        \State $t \gets 0$
+        \State \Call{Sleep}{$\frac{1}{2}$ periode}
+    \EndIf
+    \If{Signaal ontvangen}
+        \State $t \gets periode - \frac{1}{2} (periode - t)$
+    \EndIf
+    \State \Call{Sleep}{stapgrootte}
+    \State $t \gets (t + stapgrootte)$
+\EndLoop
+\end{algorithmic}
+\end{algorithm}
+
+\subsection{Radiosynchronisatie}\label{sec:radiosync}
 Om tijdsynchronisatie op Arduinos uit te kunnen voeren, is een middel nodig waarmee dat gedaan wordt. In dit geval gebruiken we hier een radio voor. Hierdoor kunnen de Arduinos onderling met elkaar communiceren. Op deze manier kunnen ze synchroon gaan lopen door elkaar te informeren over hun status.
 
-Onze Arduinos zijn allemaal met een ledje uitgerust om zo een firefly na te bootsen. De frequentie van het knipperen van een ledje is vantevoren vastgelegd. Telkens wanneer een node zijn ledje laat knipperen, zend deze een radiosignaal uit. Wanneer andere nodes deze oppikken (dus in hun luisterfase zitten), zullen zij zich de volgende ronde hierop aanpassen volgens het algoritme. Na enige tijd zullen de Arduinos nagenoeg synchroon hun ledje laten knipperen.
+Onze Arduinos zijn allemaal met een ledje uitgerust om zo een firefly na te bootsen. De frequentie van het knipperen van een ledje is van tevoren vastgelegd. Telkens wanneer een node zijn ledje laat knipperen, zendt deze tevens een radiosignaal uit. Wanneer andere nodes dit signaal oppikken (dus in hun luisterfase zitten), zullen zij zich de volgende ronde hierop aanpassen volgens het algoritme. Na enige tijd zullen de Arduinos nagenoeg synchroon lopen.
 
-\section{Geluidssynchronisatie}\label{sec:geluidssec}
+\subsection{Geluidssynchronisatie}\label{sec:geluidssec}
 De implementatie beschreven in de vorige secties is niet afhankelijk van het precieze signaal dat de Arduino's geven. Het is alleen afhankelijk van het moment waarop het signaal uitgezonden en ontvangen wordt, en de tijd hiertussen mag niet exorbitant groot worden of wisselend lang en kort duren.
 
-In plaats van een radiosignaal kunnen ook andere signalen uitgewisseld worden, bijvoorbeeld een geluidssignaal. De implementatie hiervan heeft wel wat meer voeten in de aarde, omdat er erg veel ruis is in de vorm van omgevingsgeluid. Tevens heeft de Arduino niet een standaardimplementatie die "pieken" kan detecteren; er is dus geen functie voor microfoons die vergelijkbaar is met \texttt{radio.available()}.
+In plaats van een radiosignaal kunnen ook andere signalen uitgewisseld worden, bijvoorbeeld een geluidssignaal. De implementatie hiervan heeft wel wat meer voeten in de aarde, omdat er erg veel ruis is in de vorm van omgevingsgeluid. Tevens heeft de Arduino niet een standaardimplementatie die pieken kan detecteren; er is dus geen functie voor microfoons die vergelijkbaar is met \texttt{radio.available()}.
 
 \subsection{Analoge signaalverwerking}
 Een microfoon levert geen geschikt signaal op dat digitaal verwerkt kan worden. Het signaal is te zacht, bevat veel ruis en is analoog. Om het door de Arduino te laten verwerken moet het signaal versterkt worden en omgezet worden naar een digitaal signaal. Dit doen we in drie stappen:
@@ -80,11 +104,11 @@ Het circuit dat voor dit onderzoek gebruikt is, staat in figuur~\ref{fig:circuit
 
 \begin{figure}[ht!]
     \centering
-    \includegraphics[width=0.8\textwidth]{high_pass_filter_circuit.png}
+    \includegraphics[width=0.7\textwidth]{high_pass_filter_circuit.png}
     \caption{High-pass filter met versterker en ADC. \textit{Bron: CreaTe Protobox quick reference sheet.}}
     \label{fig:circuit}
 \end{figure}
-
+\FloatBarrier
 
 \subsection{Signaalverwerking}
 In figuur~\ref{fig:on_off} is zichtbaar dat het versturen van een geluidssignaal een sterk wisselend inputsignaal geeft. We kunnen dus stellen dat als het verschil tussen twee opeenvolgende metingen erg verschilt, dat er dan zeer waarschijnlijk een signaal ontvangen wordt. Neem $v(t)$ de waarde gemeten op tijdstip $t$ zijn, dan $|v(t) - v(t+1)| > \text{threshold} \Rightarrow \text{signaal ontvangen}$.
@@ -97,25 +121,28 @@ Dit is dus een gemiddelde van de afwijkingen tussen metingen, waarbij het "gewic
 
 \begin{figure}[ht!]
     \centering
-    \includegraphics[width=0.8\textwidth]{resonance_on_off_commit_ff82f.png}
+    \includegraphics[width=0.7\textwidth]{resonance_on_off_commit_ff82f.png}
     \caption{Inkomend signaal bij pulserend signaal (van speakers; niet van Arduino).}
     \label{fig:on_off}
 \end{figure}
+\FloatBarrier
 
+In figuur~\ref{fig:resonance} is het input signaal bij twee geluidsfrequenties geplot. Beide zijn met hetzelfde opstelling gemeten, deze opstelling staat hierboven beschreven. Merk op dat het verschil tussen twee opeenvolgende metingen bij 1331Hz veel lager is dan het verschil bij 1330Hz. Om de bovenstaande manier te gebruiken is het van belang dat opeenvolgende metingen erg verschillen, en is het dus beter om 1330Hz te gebruiken dan 1331Hz.
 \begin{figure}[ht!]
     \centering
-    \includegraphics[width=0.8\textwidth]{resonance_2_frequencies_commit_ff82f.png}
+    \includegraphics[width=0.7\textwidth]{resonance_2_frequencies_commit_ff82f.png}
     \caption{Inkomend signaal bij verschillende geluidsfrequencies (van speakers; niet van Arduino).}
     \label{fig:resonance}
 \end{figure}
+\FloatBarrier
 
 \section{Resultaten en discussie}\label{sec:resultaten}
 \subsection{Resultaten radiosynchronisatie}
-De radiosynchronisatie is erg efficient; bij een groep van twee nodes halveert het tijdsverschil per synchronisatieronde. Bij grotere groepen nodes is het moeilijker om een constante verbetering te voorspellen. Lucarelli en Wang\cite{lucarelli2004decentralized} hebben bewezen dat een netwerk dat gebruik maakt van het firefly algoritme leidt tot een convergentie. Merk op dat hetzelfde geldt voor geluidssynchronisatie.
+De radiosynchronisatie synchroniseert erg snel; bij een groep van twee nodes halveert het tijdsverschil per synchronisatieronde. Bij grotere groepen nodes is het moeilijker om een constante verbetering te voorspellen. Lucarelli en Wang\cite{lucarelli2004decentralized} hebben bewezen dat een netwerk dat gebruik maakt van het firefly algoritme leidt tot een convergentie. Merk op dat hetzelfde geldt voor geluidssynchronisatie.
 
-Tijdens de tests hebben we gemerkt dat synchronisatie minder snel verloopt als twee (groepen) nodes via \'e\'en tussennode verbonden zijn. De twee groepen synchroniseerden wel, maar minder snel dan wanneer alle nodes binnen ontvangsbereik zijn.
+Tijdens de tests hebben we gemerkt dat synchronisatie minder snel verloopt als twee (groepen) nodes via \'e\'en tussennode verbonden zijn. De twee groepen synchroniseerden wel, maar minder snel dan wanneer alle nodes binnen ontvangsbereik zijn. Wel is een voordeel van de radiosynchronisatie dat het bereik van een zender vrij groot is; twee nodes op 20 meter afstand kunnen nog synchroniseren.
 
-Een nadeel aan het gebruik van de radiosynchronisatie, is dat gedurende de helft van de tijd de radio luistert naar signalen. Dit kost relatief veel stroom, maar als de radio minder dan de helft van de tijd luistert kan niet gegarandeerd worden dat het netwerk in alle gevallen synchroniseert.
+Een nadeel aan het gebruik van de radiosynchronisatie, is dat de radio gedurende de helft van de tijd luistert naar signalen. Dit kost relatief veel energie, maar als de radio minder dan de helft van de tijd luistert kan niet gegarandeerd worden dat het netwerk in alle gevallen synchroniseert.
 
 \subsection{Resultaten geluidssynschronisatie}
 Zoals al gezegd in sectie~\ref{sec:geluidssec} heeft de microfoon erg veel storing van omgevingsgeluid, zoals pratende mensen of rijdende auto's.
@@ -126,8 +153,13 @@ Bij een flase positive (ruis dat wordt herkend als signaal) is dat niet het geva
 
 We kunnen hier dus uit afleiden dat de threshold vrij hoog moet staan: het is beter om een aantal signalen te missen dan om ruis aan te zien voor een signaal. Tijdens de tests bleek een factor $n=3$ een optimaal resultaat te geven in onze ruimte. Een hogere factor filterde alle echte signalen, en een lagere factor liet de ruis door.
 
+\subsection{Vergelijking}
+Beide methodes hebben duidelijk voor- en nadelen. Radiosynchronisatie is erg betrouwbaar en convergeert snel maar kost relatief veel energie. Geluidssynchronisatie kost weinig energie maar convergeert langzamer door false negatives, en raakt vaak uit balans door false positives.
+
+Helaas kon onze opstelling geen hoogfrequente signalen testen; alle pulsen lagen in het spectrum dat mensen kunnen horen. Voor veel toepassingen zal een hoogfrequent signaal praktischer zijn, omdat mensen dan geen last ondervinden van de signalen. Als het systeem bijvoorbeeld in een bibliotheek ge\"implementeerd wordt, dan mag het geen hoorbare signalen geven omdat dit storend is voor de bezoekers.
+
 \section{Conclusie}\label{sec:conclusie}
-In dit onderzoek zijn twee implementaties van het Meshed Emergent Firefly Synchronization algoritme getest. In de resultaten was duidelijk terug te zien dat de radiosynchronisatie minder last ondervindt van ruis. Op basis van onze resultaten raden we dus aan om een radio te gebruiken, mits hiervoor genoeg stroom is.
+In dit onderzoek zijn twee implementaties van het Meshed Emergent Firefly Synchronization algoritme getest. In de resultaten was duidelijk terug te zien dat de radiosynchronisatie minder last ondervindt van ruis. Op basis van onze resultaten raden we dus aan om een radio te gebruiken, mits hiervoor genoeg stroom is. In een stille omgeving, waarbij weinig ruis is, kan ook voor geluidssynchronisatie gekozen worden.
 
 Dit onderzoek heeft slechts twee mogelijke implementaties onderzocht, een later onderzoek zou alternatieve signalen zoals licht kunnen onderzoeken. Tevens gebruiken onze implementaties een pulsefrequentie. Het zou interessant zijn om te onderzoeken of de pulsefrequentie verlaagd kan worden wanneer het netwerk gesynchroniseerd is; dit zou het energieverbruik misschien nog verder kunnen verlagen.
 
