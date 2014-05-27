@@ -32,25 +32,24 @@ Om energiezuinige draadloze communicatie mogelijk te maken, is er tijdsynchronis
 
 Tijdsynchronisatie kan op verschillende manieren geimplementeerd worden. In dit onderzoek gaan we een verschijnsel nabootsen wat we in de natuur ook kunnen vinden. De voorbeelden die hierbij gehanteerd worden, zijn vuurvliegjes en krekels. Vuurvliegjes, bijvoorbeeld, willen van nature synchroon knipperen\cite{buck1988synchronous}. Ditzelfde gedrag kan door Arduino's nagebootst worden, met behulp van radio- of geluidssignalen.
 
-In dit onderzoek kijken we naar een specifiek algoritme, het firefly algoritme\cite{leidenfrost2009firefly, yang2013firefly}. Dit algoritme implementeren we zowel voor radiocommunicatie als voor communicatie met behulp van geluid. In sectie~\ref{sec:probleemstelling} geven we een kort overzicht van eisen waaraan het protocol dient te voldoen. In sectie~\ref{sec:alg} wordt het algoritme beschreven dat hiervoor gebruikt is. Sectie~\ref{sec:radiosync} beschrijft de implementatie voor radiocommunicatie, en sectie~\ref{sec:geluidssec} beschrijft dit voor synchronisatie met behulp van geluid. In sectie~\ref{sec:resultaten} wordt besproken hoe de beide implemenaties functioneren, en geven we een korte discussie over de beide manieren van synchronisatie.
+In dit onderzoek kijken we naar een specifiek algoritme, het firefly algoritme\cite{leidenfrost2009firefly, yang2013firefly}. Dit algoritme implementeren we zowel voor radiocommunicatie als voor communicatie met behulp van geluid. In sectie~\ref{sec:probleemstelling} geven we een kort overzicht van eisen waaraan het protocol dient te voldoen. Sectie~\ref{sec:gerelateerd} geeft een overzicht van de context waarin dit werk gelezen dient te worden. In sectie~\ref{sec:alg} wordt het algoritme beschreven dat hiervoor gebruikt is. Sectie~\ref{sec:radiosync} beschrijft de implementatie voor radiocommunicatie, en sectie~\ref{sec:geluidssec} beschrijft dit voor synchronisatie met behulp van geluid. In sectie~\ref{sec:resultaten} wordt besproken hoe de beide implemenaties functioneren, en geven we een korte discussie over de beide manieren van synchronisatie.
 
 \section{Probleemstelling}\label{sec:probleemstelling}
 Voor het synchroniseren van Arduino's is een synchronisatiealgoritme nodig. Het algoritme en de implementatie dienen aan de volgende eisen te voldoen:
-Eisen:
 \begin{itemize}
     \item Nodes kunnen uit een groep verdwijnen zonder rest te beinvloeden.
     \item Nodes kunnen toegevoegd worden aan een groep, en het geheel synchroniseert.
     \item Twee groepen kunnen samengevoegd worden, en het geheel synchroniseert.
-    \item Wanneer nodes uit synchronisatie raken, worden deze bijgesteld.
+    \item Wanneer nodes uit synchronisatie raken, herstellen ze hun gesynchroniseerde staat.
     \item Frequentie van communicatie ligt zo laag mogelijk.
 \end{itemize}
 
 Uit deze eisen volgt dat er geen master-slave configuratie mogelijk is, omdat de master uit de groep kan verdwijnen. Er is een peer-to-peer configuratie nodig, waarbij iedere node gelijk is.
 
-Kunnen we een synchronisatiealgoritme implementeren dat aan de eisen voldoet en volgens de genoemde configuratie werkt?
+In dit onderzoek zullen we de vraag behandelen of we (een variant op) het firefly algoritme kunnen implementeren op dusdanige manier dat de implementatie aan bovenstaande eisen voldoet.
 
-\section{Gerelateerd werk}
-De brede toepasbaarheid van draadloze (sensor)netwerken heeft er voor gezorgd dat er al veel onderzoek naar synchronisatie gedaan is. Ook in ons geval is er al veel met het Firefly-algoritme ge\"experimenteerd. Gezien de toepasbaarheid in grotere draadloze netwerken (zie bijvoorbeeld~\cite{tyrrell2010emergent}), is er veel getest op de invloed van transmissie delay en de beperking dat een node niet tegelijkertijd kan zenden en ontvangen. Voor netwerken die een groot oppervlak overspannen kunnen deze factoren een beperking zijn.
+\section{Gerelateerd werk}\label{sec:gerelateerd}
+De brede toepasbaarheid van draadloze (sensor)netwerken heeft er voor gezorgd dat er al veel onderzoek naar synchronisatie van netwerken met agents gedaan is. Ook in ons geval is er al veel met het Firefly-algoritme ge\"experimenteerd. Gezien de toepasbaarheid in grotere draadloze netwerken (zie bijvoorbeeld~\cite{tyrrell2010emergent}), focust onderzoek veelal op de invloed van transmissie en propagatie delay en de beperking dat een node niet tegelijkertijd kan zenden en ontvangen. Voor netwerken die een groot oppervlak overspannen kunnen deze factoren een beperking zijn.
 
 Zoals gezegd in sectie~\ref{sec:probleemstelling} moet het netwerk zichzelf kunnen organiseren. Heel simpel gezegd bestaat het netwerk uit een heleboel kleine, op zichzelf staande entiteiten die simpele gedragsregels kennen. Ze hebben elk een beperkt lokaal zicht op het netwerk, en vormen samen het netwerk. Dit grote systeem is adaptief waardoor veranderingen in het netwerk geen problemen voor het netwerk in zijn geheel opleveren. Tevens is het netwerk volledig schaalbaar.
 
@@ -67,6 +66,8 @@ Het gebruikte algoritme lijkt op het firefly algoritme: het is een homogeen peer
 Iedere ronde wacht een node eerst een bepaalde tijd, en stuurt daarna een signaal. Als de node een signaal ontvangt halveert hij de tijd tot het zenden. Om te voorkomen dat twee nodes elkaar triggeren, begint iedere ronde met een halve periode slaap. Deze halve periode, waarin de node niet reageert op signalen, wordt de refractory period genoemd.
 
 \begin{algorithm}
+    \caption{Synchronisatiealgoritme}
+    \label{alg}
     \begin{algorithmic}
     \Loop
         \If{$t \geq periode$}
@@ -82,10 +83,9 @@ Iedere ronde wacht een node eerst een bepaalde tijd, en stuurt daarna een signaa
         \EndIf
     \EndLoop
     \end{algorithmic}
-    \caption{Synchronisatiealgoritme}
 \end{algorithm}
 
-Dit algoritme voldoet aan de eisen die worden gesteld in de probleemstelling (sectie~\ref{sec:probleemstelling}). Idealiter halveert het tijdsverschil tussen twee nodes iedere periode. In de praktijk zal dit iets lager zijn, in verband met de verwerkingstijd en de propagatietijd.
+Algoritme~\ref{alg} geeft een formele beschrijving van het algoritme. Hierin is $t$ de huidige fase van een node. Merk op dat de stapgrootte significant kleiner moet zijn dan de periode. Dit algoritme voldoet aan de eisen die worden gesteld in de probleemstelling (sectie~\ref{sec:probleemstelling}). Idealiter halveert het tijdsverschil tussen twee nodes iedere periode. In de praktijk zal dit iets lager zijn, in verband met de verwerkingstijd en de propagatietijd.
 
 \subsection{Radiosynchronisatie}\label{sec:radiosync}
 Om tijdsynchronisatie op Arduinos uit te kunnen voeren, is een middel nodig waarmee dat gedaan wordt. In dit geval gebruiken we hier een radio voor. Hierdoor kunnen de Arduinos onderling met elkaar communiceren. Op deze manier kunnen ze synchroon gaan lopen door elkaar te informeren over hun status.
