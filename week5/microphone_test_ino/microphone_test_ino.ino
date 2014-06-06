@@ -4,13 +4,8 @@
 #include "printf.h"
 
 RF24 radio(3, 9);
-const int role_pin = 7;
 
 void setup() {
-  // We willen radio luisteren
-  pinMode(role_pin, INPUT);
-  delay(20);
-
   // initialize the serial communication:
   Serial.begin(9600);
   printf_begin();
@@ -49,9 +44,11 @@ void loop() {
   }
   while((currMeasure - prevMeasure < 100) && (audiotime - radiotime < 40000));
 
+  float diff = audiotime - radiotime;
+
   Serial.print(" ");
-  Serial.print(audiotime - radiotime);
-  Serial.println("microsec");
+  Serial.print((diff*0.3432)/10);
+  Serial.println("cm difference");
 
   // wait a bit for the analog-to-digital converter 
   // to stabilize after the last reading:
