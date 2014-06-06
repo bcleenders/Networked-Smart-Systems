@@ -49,10 +49,11 @@ void loop() {
   while(currMeasure - prevMeasure < 100);
 
   audiotime = micros();
+  float diff = audiotime - radiotime;
 
   Serial.print(" ");
-  Serial.print(audiotime - radiotime);
-  Serial.println("microsec");
+  Serial.print((diff*0.3432)/10);
+  Serial.println("cm difference");
 
   // wait a bit for the analog-to-digital converter 
   // to stabilize after the last reading:
