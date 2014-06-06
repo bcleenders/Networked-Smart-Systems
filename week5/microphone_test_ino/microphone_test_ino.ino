@@ -4,13 +4,8 @@
 #include "printf.h"
 
 RF24 radio(3, 9);
-const int role_pin = 7;
 
 void setup() {
-  // We willen radio luisteren
-  pinMode(role_pin, INPUT);
-  delay(20);
-
   // initialize the serial communication:
   Serial.begin(9600);
   printf_begin();
