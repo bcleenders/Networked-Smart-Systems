@@ -21,36 +21,43 @@ void setup() {
   radio.openWritingPipe(0xdeadbeefa1LL);
   radio.startListening();
   radio.setAutoAck(false);
-  radio.printDetails();
+  //radio.printDetails();
 }
 
 unsigned long radiotime;
 unsigned long audiotime;
+unsigned long timelimit = 50000LL;
 int prevMeasure = 0;
 int currMeasure = 0;
+uint8_t activeBeacon;
 
 void loop() {
-  while (! radio.available()) { }
+  while(radio.available()) { 
+    radio.read(&activeBeacon, sizeof(uint8_t)); 
+  }
+  while (! radio.available()) { 
+  }
 
   radiotime = micros();
-  uint8_t activeBeacon;
   radio.read( &activeBeacon, sizeof(uint8_t));
-  Serial.print(activeBeacon);
 
-  do {
-    prevMeasure = currMeasure;
-    currMeasure = analogRead(A0);
+  currMeasure = analogRead(A0);
+
+  while(analogRead(A0) < 50) {
     audiotime = micros();
+    if(audiotime - radiotime > timelimit) {
+      Serial.println("timeout");
+      return; 
+    }
   }
-  while((currMeasure - prevMeasure < 100) && (audiotime - radiotime < 40000));
+  
 
   float diff = audiotime - radiotime;
 
+  Serial.print(activeBeacon);
   Serial.print(" ");
-  Serial.print((diff*0.3432)/10);
-  Serial.println("cm difference");
-
-  // wait a bit for the analog-to-digital converter 
-  // to stabilize after the last reading:
-  delay(10);
+  Serial.print((diff*0.3432)/1000);
+  Serial.println("m difference");
 }
+
+
