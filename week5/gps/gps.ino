@@ -1,6 +1,6 @@
 /*
     GPS algorithm borrowed from: 
-        http://download.springer.com/static/pdf/364/chp%253A10.1007%252F978-3-642-25486-4_59.pdf?auth66=1402220924_d5d9e75a9f857afe1a03b64a6df09c5d&ext=.pdf
+        http://link.springer.com/chapter/10.1007/978-3-642-25486-4_59#page-1
 */
 #include <SPI.h>
 #include "nRF24L01.h"
@@ -16,7 +16,7 @@ unsigned long audiotime;
 unsigned long timelimit = 50000LL;
 uint8_t activeBeacon;
 
-float pos[4][2] = { // Positions van de bacons; pos[1][1] is de y positie van bacon 1
+float pos[4][2] = { // Positions van de beacons; pos[1][1] is de y positie van beacon 1
     {0.0, 30.0},
     {80.0, 0.0},
     {320.0, 0.0},
@@ -24,9 +24,9 @@ float pos[4][2] = { // Positions van de bacons; pos[1][1] is de y positie van ba
 };
 
 float A[N][N] = { // Relatieve afstanden tussen de nodes; gebruikt node 3 nog niet!
-    {2*pos[1][0] - 2*pos[0][0], 2*pos[1][1] - 2*pos[0][1], 1},
-    {2*pos[2][0] - 2*pos[1][0], 2*pos[2][1] - 2*pos[1][1], 1},
-    {2*pos[0][0] - 2*pos[2][0], 2*pos[0][1] - 2*pos[2][1], 1}
+    {2*pos[1][0] - 2*pos[0][0], 2*pos[1][1] - 2*pos[0][1], 0.000001},
+    {2*pos[2][0] - 2*pos[1][0], 2*pos[2][1] - 2*pos[1][1], 0.000001},
+    {2*pos[0][0] - 2*pos[2][0], 2*pos[0][1] - 2*pos[2][1], 0.000001}
 };
 
 // Static; just add d_0 and d_1
