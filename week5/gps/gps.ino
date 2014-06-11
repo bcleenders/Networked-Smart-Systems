@@ -17,10 +17,10 @@ unsigned long timelimit = 50000LL;
 uint8_t activeBeacon;
 
 float pos[4][2] = { // Positions van de beacons; pos[1][1] is de y positie van beacon 1
-    {0.0, 30.0},
-    {80.0, 0.0},
-    {320.0, 0.0},
-    {400.0, 30.0}
+    {0.0, 75.0},
+    {72.0, 0.0},
+    {294.0, 0.0},
+    {372.0, 136.0}
 };
 
 float A[N][N] = { // Relatieve afstanden tussen de nodes; gebruikt node 3 nog niet!
@@ -76,7 +76,7 @@ void loop() {
   while(analogRead(A0) < 50) {
     audiotime = micros();
     if(audiotime - radiotime > timelimit) {
-      Serial.println("timeout");
+      //Serial.println("timeout");
       return; 
     }
   }
@@ -84,7 +84,8 @@ void loop() {
   float diff = audiotime - radiotime;
   diff = diff * 0.03432; // Afstand tot beacon in cm
 
-  D[activeBeacon] = D[activeBeacon]*0.8 + diff*0.2; // Weer schuivend gemiddelde
+//  D[activeBeacon] = D[activeBeacon]*0.8 + diff*0.2; // Weer schuivend gemiddelde
+  D[activeBeacon] = diff;
 
   if(activeBeacon == 3) {
     calcPosition();
