@@ -101,6 +101,15 @@ void loop() {
   float diff = audiotime - radiotime;
   diff = diff * 0.03432; // Afstand tot beacon in cm
 
+  // Zwak uitschieters een beetje af: max 30% increase
+  if(diff > (D[activeBeacon]*1.15) && D[activeBeacon] > 0) {
+    diff = D[activeBeacon] * 1.15;
+  }
+  
+  if(diff < (D[activeBeacon]*0.85)) {
+    diff = D[activeBeacon]*0.85;
+  }
+  
   D[activeBeacon] = D[activeBeacon]*0.8 + diff*0.2; // Weer schuivend gemiddelde
 //  D[activeBeacon] = diff;
 
