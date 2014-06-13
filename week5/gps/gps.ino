@@ -24,51 +24,6 @@ float pos[4][2] = { // Positions van de beacons; pos[1][1] is de y positie van b
     {372.0, 136.0}
 };
 
-float matrix_A3[N][N] = { // Relatieve afstanden tussen de nodes; gebruikt node 3 nog niet!
-    {2*pos[1][0] - 2*pos[0][0], 2*pos[1][1] - 2*pos[0][1], Z},
-    {2*pos[2][0] - 2*pos[1][0], 2*pos[2][1] - 2*pos[1][1], Z},
-    {2*pos[0][0] - 2*pos[2][0], 2*pos[0][1] - 2*pos[2][1], Z}
-};
-
-float matrix_A2[N][N] = { // Relatieve afstanden tussen de nodes; gebruikt node 2 nog niet!
-    {2*pos[1][0] - 2*pos[0][0], 2*pos[1][1] - 2*pos[0][1], Z},
-    {2*pos[3][0] - 2*pos[1][0], 2*pos[3][1] - 2*pos[1][1], Z},
-    {2*pos[0][0] - 2*pos[3][0], 2*pos[0][1] - 2*pos[3][1], Z}
-};
-float matrix_A1[N][N] = { // Relatieve afstanden tussen de nodes; gebruikt node 1 nog niet!
-    {2*pos[2][0] - 2*pos[0][0], 2*pos[2][1] - 2*pos[0][1], Z},
-    {2*pos[3][0] - 2*pos[2][0], 2*pos[3][1] - 2*pos[2][1], Z},
-    {2*pos[0][0] - 2*pos[3][0], 2*pos[0][1] - 2*pos[3][1], Z}
-};
-float matrix_A0[N][N] = { // Relatieve afstanden tussen de nodes; gebruikt node 0 nog niet!
-    {2*pos[2][0] - 2*pos[1][0], 2*pos[2][1] - 2*pos[1][1], Z},
-    {2*pos[3][0] - 2*pos[2][0], 2*pos[3][1] - 2*pos[2][1], Z},
-    {2*pos[1][0] - 2*pos[3][0], 2*pos[1][1] - 2*pos[3][1], Z}
-};
-
-// Static; just add d_0 and d_1
-float B_static3[N] = {
-    /*d_0^2 - d_1^2 */ - (pos[0][0]*pos[0][0]) + (pos[1][0]*pos[1][0]) - (pos[0][1]*pos[0][1]) + (pos[1][1]*pos[1][1]) /* dz = 0 */,
-    /*d_1^2 - d_2^2 */ - (pos[1][0]*pos[1][0]) + (pos[2][0]*pos[2][0]) - (pos[1][1]*pos[1][1]) + (pos[2][1]*pos[2][1]) /* dz = 0 */,
-    /*d_2^2 - d_0^2 */ - (pos[2][0]*pos[2][0]) + (pos[0][0]*pos[0][0]) - (pos[2][1]*pos[2][1]) + (pos[0][1]*pos[0][1]) /* dz = 0 */
-};
-
-float B_static2[N] = {
-    /*d_0^2 - d_1^2 */ - (pos[0][0]*pos[0][0]) + (pos[1][0]*pos[1][0]) - (pos[0][1]*pos[0][1]) + (pos[1][1]*pos[1][1]) /* dz = 0 */,
-    /*d_1^2 - d_3^2 */ - (pos[1][0]*pos[1][0]) + (pos[3][0]*pos[3][0]) - (pos[1][1]*pos[1][1]) + (pos[3][1]*pos[3][1]) /* dz = 0 */,
-    /*d_3^2 - d_0^2 */ - (pos[3][0]*pos[3][0]) + (pos[0][0]*pos[0][0]) - (pos[3][1]*pos[3][1]) + (pos[0][1]*pos[0][1]) /* dz = 0 */
-};
-float B_static1[N] = {
-    /*d_0^2 - d_1^2 */ - (pos[0][0]*pos[0][0]) + (pos[2][0]*pos[2][0]) - (pos[0][1]*pos[0][1]) + (pos[2][1]*pos[2][1]) /* dz = 0 */,
-    /*d_1^2 - d_3^2 */ - (pos[2][0]*pos[2][0]) + (pos[3][0]*pos[3][0]) - (pos[2][1]*pos[2][1]) + (pos[3][1]*pos[3][1]) /* dz = 0 */,
-    /*d_3^2 - d_0^2 */ - (pos[3][0]*pos[3][0]) + (pos[0][0]*pos[0][0]) - (pos[3][1]*pos[3][1]) + (pos[0][1]*pos[0][1]) /* dz = 0 */
-};
-float B_static0[N] = {
-    /*d_0^2 - d_1^2 */ - (pos[1][0]*pos[1][0]) + (pos[2][0]*pos[2][0]) - (pos[1][1]*pos[1][1]) + (pos[2][1]*pos[2][1]) /* dz = 0 */,
-    /*d_1^2 - d_3^2 */ - (pos[2][0]*pos[2][0]) + (pos[3][0]*pos[3][0]) - (pos[2][1]*pos[2][1]) + (pos[3][1]*pos[3][1]) /* dz = 0 */,
-    /*d_3^2 - d_0^2 */ - (pos[3][0]*pos[3][0]) + (pos[1][0]*pos[1][0]) - (pos[3][1]*pos[3][1]) + (pos[1][1]*pos[1][1]) /* dz = 0 */
-};
-
 float D[4];
 
 
@@ -89,22 +44,6 @@ void setup() {
   radio.startListening();
   radio.setAutoAck(false);
   //radio.printDetails();
-
-  Matrix.Invert((float*)matrix_A3,N);
-  Serial.println("\nInverted matrix_A3:");
-  Matrix.Print((float*)matrix_A3,N,N,"matrix_A3");
-  
-  Matrix.Invert((float*)matrix_A2,N);
-  Serial.println("\nInverted matrix_A2:");
-  Matrix.Print((float*)matrix_A2,N,N,"matrix_A2");
-  
-  Matrix.Invert((float*)matrix_A1,N);
-  Serial.println("\nInverted matrix_A1:");
-  Matrix.Print((float*)matrix_A1,N,N,"matrix_A1");
-  
-  Matrix.Invert((float*)matrix_A0,N);
-  Serial.println("\nInverted matrix_A0:");
-  Matrix.Print((float*)matrix_A0,N,N,"matrix_A0");
 }
 
 void loop() {
@@ -129,7 +68,7 @@ void loop() {
   float diff = audiotime - radiotime;
   diff = diff * 0.03432; // Afstand tot beacon in cm
 
-  /* Zwak uitschieters een beetje af: max 30% increase
+  Zwak uitschieters een beetje af: max 30% increase
   if(diff > (D[activeBeacon]*1.15) && D[activeBeacon] > 0) {
     diff = D[activeBeacon] * 1.15;
   }
@@ -139,62 +78,78 @@ void loop() {
   }
   
   D[activeBeacon] = D[activeBeacon]*0.8 + diff*0.2; // Weer schuivend gemiddelde */
-  D[activeBeacon] = diff;
+  //D[activeBeacon] = diff;
 
   if(activeBeacon == 3) {
     calcPosition();
   }
 }
 
-void calcPosition() {
-    float Bdrie[N] = {
-        (D[0]*D[0]) - (D[1]*D[1]) + B_static3[0],
-        (D[1]*D[1]) - (D[2]*D[2]) + B_static3[1],
-        (D[2]*D[2]) - (D[0]*D[0]) + B_static3[2]
-    };
-    
-    float Btwee[N] = {
-        (D[0]*D[0]) - (D[1]*D[1]) + B_static2[0],
-        (D[1]*D[1]) - (D[3]*D[3]) + B_static2[1],
-        (D[3]*D[3]) - (D[0]*D[0]) + B_static2[2]
-    };
-    
-    float Been[N] = {
-        (D[0]*D[0]) - (D[2]*D[2]) + B_static2[0],
-        (D[2]*D[2]) - (D[3]*D[3]) + B_static2[1],
-        (D[3]*D[3]) - (D[0]*D[0]) + B_static2[2]
-    };
-    
-    float Bnul[N] = {
-        (D[1]*D[1]) - (D[2]*D[2]) + B_static2[0],
-        (D[2]*D[2]) - (D[3]*D[3]) + B_static2[1],
-        (D[3]*D[3]) - (D[1]*D[1]) + B_static2[2]
-    };
+float A[N][N];
+float B[N];
 
+void calcPosition() {
+    // Relatieve afstanden tussen de nodes; gebruikt node 3 nog niet!
+    A[0][0] = 2*pos[1][0] - 2*pos[0][0]; A[0][1] = 2*pos[1][1] - 2*pos[0][1]; A[0][2] = Z;
+    A[1][0] = 2*pos[2][0] - 2*pos[1][0]; A[1][1] = 2*pos[2][1] - 2*pos[1][1]; A[1][2] = Z;
+    A[2][0] = 2*pos[0][0] - 2*pos[2][0]; A[2][1] = 2*pos[0][1] - 2*pos[2][1]; A[2][2] = Z;
+    Matrix.Invert((float*)A,N);
+
+    B[0] = (D[0]*D[0]) - (D[1]*D[1]) - (pos[0][0]*pos[0][0]) + (pos[1][0]*pos[1][0]) - (pos[0][1]*pos[0][1]) + (pos[1][1]*pos[1][1]);
+    B[1] = (D[1]*D[1]) - (D[2]*D[2]) - (pos[1][0]*pos[1][0]) + (pos[2][0]*pos[2][0]) - (pos[1][1]*pos[1][1]) + (pos[2][1]*pos[2][1]);
+    B[2] = (D[2]*D[2]) - (D[0]*D[0]) - (pos[2][0]*pos[2][0]) + (pos[0][0]*pos[0][0]) - (pos[2][1]*pos[2][1]) + (pos[0][1]*pos[0][1]);
+    
     float P3[N];
-    Matrix.Multiply((float*)matrix_A3,(float*)Bdrie,N,N,1,(float*)P3);
-    Serial.println("\nPosition (P3):");
-    Matrix.Print((float*)P3,N,1,"P3");
+    Matrix.Multiply((float*)A,(float*)B,N,N,1,(float*)P3);
+    printf("Position (P3): (%d,%d)\n", (int) P3[0], (int) P3[1]);
     
+
+    // Relatieve afstanden tussen de nodes; gebruikt node 2 nog niet!
+    A[0][0] = 2*pos[1][0] - 2*pos[0][0]; A[0][1] = 2*pos[1][1] - 2*pos[0][1]; A[0][2] = Z;
+    A[1][0] = 2*pos[3][0] - 2*pos[1][0]; A[1][1] = 2*pos[3][1] - 2*pos[1][1]; A[1][2] = Z;
+    A[2][0] = 2*pos[0][0] - 2*pos[3][0]; A[2][1] = 2*pos[0][1] - 2*pos[3][1]; A[2][2] = Z;
+    Matrix.Invert((float*)A,N);
+
+    B[0] = (D[0]*D[0]) - (D[1]*D[1]) - (pos[0][0]*pos[0][0]) + (pos[1][0]*pos[1][0]) - (pos[0][1]*pos[0][1]) + (pos[1][1]*pos[1][1]);
+    B[1] = (D[1]*D[1]) - (D[3]*D[3]) - (pos[1][0]*pos[1][0]) + (pos[3][0]*pos[3][0]) - (pos[1][1]*pos[1][1]) + (pos[3][1]*pos[3][1]);
+    B[2] = (D[3]*D[3]) - (D[0]*D[0]) - (pos[3][0]*pos[3][0]) + (pos[0][0]*pos[0][0]) - (pos[3][1]*pos[3][1]) + (pos[0][1]*pos[0][1]);
     float P2[N];
-    Matrix.Multiply((float*)matrix_A2,(float*)Btwee,N,N,1,(float*)P2);
-    Serial.println("\nPosition (P2):");
-    Matrix.Print((float*)P2,N,1,"P2");
+    Matrix.Multiply((float*)A,(float*)B,N,N,1,(float*)P2);
+    printf("Position (P2): (%d,%d)\n", (int) P2[0], (int) P2[1]);
     
-    /*float P1[N];
-    Matrix.Multiply((float*)matrix_A1,(float*)Been,N,N,1,(float*)P1);
-    Serial.println("\nPosition (P1):");
-    Matrix.Print((float*)P1,N,1,"P1");
     
+    // Relatieve afstanden tussen de nodes; gebruikt node 1 nog niet!
+    A[0][0] = 2*pos[2][0] - 2*pos[0][0]; A[0][1] = 2*pos[2][1] - 2*pos[0][1]; A[0][2] = Z;
+    A[1][0] = 2*pos[3][0] - 2*pos[2][0]; A[1][1] = 2*pos[3][1] - 2*pos[2][1]; A[1][2] = Z;
+    A[2][0] = 2*pos[0][0] - 2*pos[3][0]; A[2][1] = 2*pos[0][1] - 2*pos[3][1]; A[2][2] = Z;
+    Matrix.Invert((float*)A,N);
+   
+    B[0] = (D[0]*D[0]) - (D[2]*D[2]) - (pos[0][0]*pos[0][0]) + (pos[2][0]*pos[2][0]) - (pos[0][1]*pos[0][1]) + (pos[2][1]*pos[2][1]);
+    B[1] = (D[2]*D[2]) - (D[3]*D[3]) - (pos[2][0]*pos[2][0]) + (pos[3][0]*pos[3][0]) - (pos[2][1]*pos[2][1]) + (pos[3][1]*pos[3][1]);
+    B[2] = (D[3]*D[3]) - (D[0]*D[0]) - (pos[3][0]*pos[3][0]) + (pos[0][0]*pos[0][0]) - (pos[3][1]*pos[3][1]) + (pos[0][1]*pos[0][1]);
+    float P1[N];
+    Matrix.Multiply((float*)A,(float*)B,N,N,1,(float*)P1);
+    printf("Position (P1): (%d,%d)\n", (int) P1[0], (int) P1[1]);
+    
+    
+    // Relatieve afstanden tussen de nodes; gebruikt node 0 nog niet!
+    A[0][0] = 2*pos[2][0] - 2*pos[1][0]; A[0][1] = 2*pos[2][1] - 2*pos[1][1]; A[0][2] = Z;
+    A[1][0] = 2*pos[3][0] - 2*pos[2][0]; A[1][1] = 2*pos[3][1] - 2*pos[2][1]; A[1][2] = Z;
+    A[2][0] = 2*pos[1][0] - 2*pos[3][0]; A[2][1] = 2*pos[1][1] - 2*pos[3][1]; A[2][2] = Z;
+    Matrix.Invert((float*)A,N);
+   
+    B[0] = (D[1]*D[1]) - (D[2]*D[2]) - (pos[1][0]*pos[1][0]) + (pos[2][0]*pos[2][0]) - (pos[1][1]*pos[1][1]) + (pos[2][1]*pos[2][1]);
+    B[1] = (D[2]*D[2]) - (D[3]*D[3]) - (pos[2][0]*pos[2][0]) + (pos[3][0]*pos[3][0]) - (pos[2][1]*pos[2][1]) + (pos[3][1]*pos[3][1]);
+    B[2] = (D[3]*D[3]) - (D[1]*D[1]) - (pos[3][0]*pos[3][0]) + (pos[1][0]*pos[1][0]) - (pos[3][1]*pos[3][1]) + (pos[1][1]*pos[1][1]);
     float P0[N];
-    Matrix.Multiply((float*)matrix_A0,(float*)Bnul,N,N,1,(float*)P0);
-    Serial.println("\nPosition (P0):");
-    Matrix.Print((float*)P0,N,1,"P0");
-    */
+    Matrix.Multiply((float*)A,(float*)B,N,N,1,(float*)P0);
+    printf("Position (P0): (%d,%d)\n", (int) P0[0], (int) P0[1]);
+    
+    // Bereken het gemiddelde van de verschillende metingen:
     int avg[N];
-    avg[0] = (int)(P2[0] + P3[0]) / 2.0;
-    avg[1] = (int)(P2[1] + P3[1]) / 2.0;
-    avg[2] = (int)(P2[2] + P3[2]) / 2.0;
+    avg[0] = (int) (P0[0] + P1[0] + P2[0] + P3[0]) / 4.0;
+    avg[1] = (int) (P0[1] + P1[1] + P2[1] + P3[1]) / 4.0;
+    avg[2] = (int) (P0[2] + P1[2] + P2[2] + P3[2]) / 4.0;
   
-    printf("\nPosition: (%d,%d)\n", avg[0], avg[1]);
+    printf("Position: (%d,%d)\n\n", avg[0], avg[1]);
 }
