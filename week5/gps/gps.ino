@@ -9,7 +9,13 @@
 #include "MatrixMath.h"
 
 #define N (3)
+// Kunstmatige waarde voor Z coordinaten
 #define Z 1.0
+// Percentage verschil (0 < MAX_DIFF <= 1) dat tussen twee metingen mag zitten.
+#define MAX_DIFF (0.25)
+// Percentage dat de nieuwste meting in het gemiddelde meetelt (0 < WEIGHT <= 1)
+// Bij WEIGHT=1 wordt er geen gemiddelde bijgehouden, maar is de nieuwste meting de enige die meetelt.
+#define WEIGHT (0.2)
 
 RF24 radio(3, 9);
 unsigned long radiotime;
@@ -68,17 +74,16 @@ void loop() {
   float diff = audiotime - radiotime;
   diff = diff * 0.03432; // Afstand tot beacon in cm
 
-  Zwak uitschieters een beetje af: max 30% increase
-  if(diff > (D[activeBeacon]*1.15) && D[activeBeacon] > 0) {
-    diff = D[activeBeacon] * 1.15;
+  //Zwak uitschieters een beetje af: max 30% increase
+  if(diff > (D[activeBeacon]* (1.0 + MAX_DIFF)) && D[activeBeacon] > 0) {
+    diff = D[activeBeacon] * (1.0 + MAX_DIFF);
   }
   
-  if(diff < (D[activeBeacon]*0.85)) {
-    diff = D[activeBeacon]*0.85;
+  if(diff < (D[activeBeacon]* (1.0 - MAX_DIFF))) {
+    diff = D[activeBeacon]*(1.0 - MAX_DIFF);
   }
   
-  D[activeBeacon] = D[activeBeacon]*0.8 + diff*0.2; // Weer schuivend gemiddelde */
-  //D[activeBeacon] = diff;
+  D[activeBeacon] = D[activeBeacon]*(1.0 - WEIGHT) + diff*WEIGHT; // Weer schuivend gemiddelde */
 
   if(activeBeacon == 3) {
     calcPosition();
