@@ -1,0 +1,74 @@
+
+\documentclass[a4paper,10pt]{article}
+\usepackage[utf8]{inputenc}
+\usepackage{amstext}
+\usepackage{listings}
+\usepackage{graphicx}
+\usepackage{subfigure}
+\usepackage[colorinlistoftodos]{todonotes}
+\usepackage[T1]{fontenc}
+\usepackage[utf8]{inputenc}
+\usepackage[font=small,labelfont=bf]{caption}
+\usepackage{float}
+\usepackage[dutch]{babel}
+\usepackage[section]{placeins}
+\usepackage{algorithm}
+\usepackage{algpseudocode}
+\usepackage{algorithmicx}
+
+\DeclareCaptionLabelFormat{andtable}{#1~#2  \&  \tablename~\thetable}
+
+
+%opening
+\title{Indoor positioning met Arduino's}
+\author{Bram Leenders \& Patrick van Looy}
+
+\begin{document}
+
+\maketitle
+
+\section{Inleiding}
+...
+
+\section{Gerelateerd werk}\label{sec:gerelateerd}
+TOF (Time of flight) vs. RSSI (received signal strength indication) vs. TDOA (time difference of arrival)
+Er zijn verschillende manier om met behulp van radio en/of geluidssignalen een afstand te meten, we zullen de volgende drie kort toelichten:
+\begin{itemize}
+    \item Received Signal Strength Indication (RSSI)
+    \item Time Difference of Arrival (TDOA)
+    \item Time of Flight (TOF)
+\end{itemize}
+
+\subsection{Time of Flight}
+Voor het onderzoek van deze paper is de time of flight (TOF) gebruikt om de afstand tussen beacons en de ontvanger te meten. Bij deze methode wordt gebruik gemaakt van het verschil in propagatiesnelheid van licht en geluid; radiosignalen gaan met lichtsnelheid (ca. $3\cdot 10^{8}$m/s), maar geluid gaat veel langzamer (ca $340$ m/s). Door beacons tegelijkertijd een radio- en een geluidssignaal uit te laten zenden kan met behulp van het verschil in ontvangsttijden de afstand tussen het beacon en een ontvanger berekend worden. Deze techniek wordt beschreven door Barshan en Ballur~\cite{barshan2000fast}.
+
+Figuur~\ref{fig:tijdsdiagram} geeft een voorbeeld van inkomende signalen bij een dergelijke aanpak.
+\begin{figure}[ht!]
+    \centering
+    \includegraphics[width=0.7\textwidth]{tijdsdiagram.png}
+    \caption{Tijdsdiagram radio en microfoon input. \textit{Bron: \cite{park2011beacon}}}
+    \label{fig:tijdsdiagram}
+\end{figure}
+
+\section{Implementatie}
+De implementatie gebruikt de time of flight (TOF) om de afstand tussen beacons en de ontvanger te meten.
+
+
+
+
+\section{Resultaten en discussie}\label{sec:resultaten}
+...
+
+\section{Conclusie}\label{sec:conclusie}
+...
+
+\newpage
+\appendix
+\section{Bijlage 1 - Code}
+\label{sec:code}
+\input{code_formatted}
+
+\bibliographystyle{plain}
+\bibliography{verslag_week_5}
+
+\end{document}
