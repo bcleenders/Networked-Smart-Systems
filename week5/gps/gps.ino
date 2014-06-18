@@ -84,6 +84,7 @@ void loop() {
   }
   
   D[activeBeacon] = D[activeBeacon]*(1.0 - WEIGHT) + diff*WEIGHT; // Weer schuivend gemiddelde */
+  //D[activeBeacon] = diff;
 
   if(activeBeacon == 3) {
     calcPosition();
