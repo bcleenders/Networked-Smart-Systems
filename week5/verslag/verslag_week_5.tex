@@ -27,13 +27,14 @@
 \maketitle
 
 \section{Inleiding}
-Voor veel verschillende situaties is het enorm handig om locatiebepaling ge\"implementeerd te hebben op nodes zodat deze weten wat hun locatie is. Denk bijvoorbeeld aan een sensornetwerk in het bos, bedoelt om bosbranden te detecteren. Het zou hierbij wel handig zijn dat als een node een brand constateert, het ook gelijk door kan geven waar precies de brand is ontstaan. Op deze manier kan de brand doelgericht en snel bestreden worden.
+Voor veel toepassingen van draadloze sensornetwerken is het weten van de locatie van de sensoren erg nuttig of zelfs noodzakelijk. Een voorbeeld hiervan is een sensornetwerk in het bos, bedoeld om bosbranden te detecteren. Voor geografisch grote netwerken is het een handige toevoeging als een node niet alleen detecteert dat er brand is, maar ook waar deze brand is. Op deze manier kan de brand doelgericht en snel bestreden worden, omdat er meer informatie over bekend is.
 
-Locatiebepaling kan op verschillende manieren gedaan worden, bijvoorbeeld door het gebruik van GPS. Dit onderzoek legt vooral de focus op locatiebepaling door middel van hoogfrequent geluid. Het doel van dit onderzoek is om de locatie van een Arduino met een ultrasoon-ontvanger te bepalen ten opzichte van vier ultrasoon-verzenders die zich op bekende posities bevinden en afwisselend een geluidspuls versturen. Hiervoor moet een lokalisatiealgoritmeontwikkeld worden dat gebruik maakt van de signalen die verzonden worden door deze vier bakens.
+Locatiebepaling kan op verschillende manieren gedaan worden, een bekend voorbeeld hiervan is GPS. Dit onderzoek legt de focus op locatiebepaling door middel van hoogfrequent geluid. Het doel van dit onderzoek is om de locatie van een Arduino met een ultrasoon-ontvanger te bepalen ten opzichte van vier ultrasoon-verzenders die zich op bekende posities bevinden en afwisselend een geluidspuls versturen. Hiervoor moet een lokalisatiealgoritmeontwikkeld worden dat gebruik maakt van de signalen die verzonden worden door deze vier bakens.
 
 Allereerst zullen we een probleemstelling formuleren zodat we een uitgangspunt voor onze tests hebben, dit doen we in sectie~\ref{sec:probleemstelling}. In sectie~\ref{sec:gerelateerd} worden drie mogelijke manieren van afstandbepaling toegelicht. Daarnaast wordt in sectie~\ref{sec:implementatie} de implementatie beschreven. Vervolgens behandelen we in sectie~\ref{sec:resultaten} de resultaten die we door middel van onze tests hebben gekregen. Als laatste trekken we hieruit een conclusie in sectie~\ref{sec:conclusie}.
 
 \section{Probleemstelling}\label{sec:probleemstelling}
+\todo[inline]{bla}
 
 \section{Gerelateerd werk}\label{sec:gerelateerd}
 Er zijn verschillende manier om met behulp van radio en/of geluidssignalen een afstand te meten, we zullen de volgende drie kort toelichten:
@@ -99,18 +100,27 @@ De activiteiten van de verschillende bakens zijn als volgt: een van de bakens (B
     \end{minipage}
 \end{table}
 
+\subsection{Algoritme}
+Voor het omzetten van de afstanden tussen de ontvanger en de verschillende beacons zijn de berekeningen van Park et al.~\cite{park2011beacon} gebruikt. Doordat de afstanden tot de beacons bekend zijn kan een cirkel worden afgeleid waarop de ontvanger zich bevindt. Doordat meerdere cirkels bekend zijn kan de intersectie van die verschillende cirkels berekend worden: deze intersectie is de locatie van de ontvanger.
+
+Er is gekozen voor deze berekening omdat de locaties van de beacons en de afstanden tot de beacons vrij intuitief als matrices gerepresenteerd worden. Als kanttekening moet vermeld worden dat dit algoritme niet alleen de x en y positie berekent, maar ook de z positie probeert te berekenen. Echter, omdat alle beacons op dezelfde hoogte staan is dit met onze opstelling niet mogelijk geweest. Er is immers niet te achterhalen of de z positie positief of negatief is; doordat alle beacons in een vlak staan kan de zco\"ordinaat gespiegeld worden. Vanwege deze reden hebben we ervoor gekozen om de z-co\"ordinaat niet in de resultaten op te nemen.
+
+De gebruikte code is bijgevoegd in appendix~\ref{sec:code}. Merk op dat de posities van de beacons hardcoded is; deze kan worden aangepast indien de beacons een andere configuratie hebben. De positie van de ontvanger is relatief ten opzichte van de beacons.
+
+Tijdens de tests is de lijn tussen beacon 1 en 2 als y-as gebruikt, en beacon 0 was op de x-as (die onder een hoek van 90 graden de y-as kruist). Het algoritme ondersteunt ook negatieve waardes voor als de ontvanger zich achter de y-as bevindt.
+
 \section{Resultaten en discussie}\label{sec:resultaten}
-...
+\todo[inline]{bla}
 
 \section{Conclusie}\label{sec:conclusie}
-...
+\todo[inline]{bla}
 
 \bibliographystyle{plain}
 \bibliography{verslag_week_5}
 
 \newpage
 \appendix
-\section{Bijlage 1 - Code}
+\section{Arduino code}
 \label{sec:code}
 \input{code_formatted}
 
