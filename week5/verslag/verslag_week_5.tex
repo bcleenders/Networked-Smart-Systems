@@ -1,4 +1,3 @@
-
 \documentclass[a4paper,10pt]{article}
 \usepackage[utf8]{inputenc}
 \usepackage{amstext}
@@ -28,19 +27,33 @@
 \maketitle
 
 \section{Inleiding}
-...
+Voor veel verschillende situaties is het enorm handig om locatiebepaling ge\"implementeerd te hebben op nodes zodat deze weten wat hun locatie is. Denk bijvoorbeeld aan een sensornetwerk in het bos, bedoelt om bosbranden te detecteren. Het zou hierbij wel handig zijn dat als een node een brand constateert, het ook gelijk door kan geven waar precies de brand is ontstaan. Op deze manier kan de brand doelgericht en snel bestreden worden.
+
+Locatiebepaling kan op verschillende manieren gedaan worden, bijvoorbeeld door het gebruik van GPS. Dit onderzoek legt vooral de focus op locatiebepaling door middel van hoogfrequent geluid. Het doel van dit onderzoek is om de locatie van een Arduino met een ultrasoon-ontvanger te bepalen ten opzichte van vier ultrasoon-verzenders die zich op bekende posities bevinden en afwisselend een geluidspuls versturen. Hiervoor moet een lokalisatiealgoritmeontwikkeld worden dat gebruik maakt van de signalen die verzonden worden door deze vier bakens.
+
+Allereerst zullen we een probleemstelling formuleren zodat we een uitgangspunt voor onze tests hebben, dit doen we in sectie~\ref{sec:probleemstelling}. In sectie~\ref{sec:gerelateerd} worden drie mogelijke manieren van afstandbepaling toegelicht. Daarnaast wordt in sectie~\ref{sec:implementatie} de implementatie beschreven. Vervolgens behandelen we in sectie~\ref{sec:resultaten} de resultaten die we door middel van onze tests hebben gekregen. Als laatste trekken we hieruit een conclusie in sectie~\ref{sec:conclusie}.
+
+\section{Probleemstelling}\label{sec:probleemstelling}
 
 \section{Gerelateerd werk}\label{sec:gerelateerd}
-TOF (Time of flight) vs. RSSI (received signal strength indication) vs. TDOA (time difference of arrival)
 Er zijn verschillende manier om met behulp van radio en/of geluidssignalen een afstand te meten, we zullen de volgende drie kort toelichten:
 \begin{itemize}
     \item Received Signal Strength Indication (RSSI)
     \item Time Difference of Arrival (TDOA)
     \item Time of Flight (TOF)
 \end{itemize}
+Deze drie zijn met de beschikbare hardware (Arduino, RF24 chip en microfoon) implementeerbaar, dus er moet een keuze uit deze drie gemaakt worden.
+
+\subsection{Received Signal Strength Indication}
+Bij RSSI wordt de sterkte van het signaal gebruikt om een schatting te maken van de afstand tussen een zender en een ontvanger. Deze methode heeft een aantal nadelen, zoals beschreven door Seshadi et al.~\cite{seshadri2005bayesian}. De belangrijkste nadelen zijn de wisselende signaalsterkte, kosten van meet- en zendapparatuur en verstoringen van objecten tussen zender en ontvanger. Vanwege deze redenen hebben we niet voor RSSI als methode gekozen.
+
+\subsection{Time Difference of Arrival}
+Bij TDOA wordt gebruik gemaakt van het verschil in afstand tussen twee zenders. Als twee zenders tegelijkertijd een signaal uitzenden, kan een ontvanger een mogelijk verschil in ontvangsttijd meten. Dit verschil in ontvangsttijd kan dan omgezet worden naar een verschil in afstand tussen de twee zenders. Deze methode wordt verder uitgewerkt door Gustaffson et al.~\cite{gustafsson2003positioning}.
 
 \subsection{Time of Flight}
-Voor het onderzoek van deze paper is de time of flight (TOF) gebruikt om de afstand tussen beacons en de ontvanger te meten. Bij deze methode wordt gebruik gemaakt van het verschil in propagatiesnelheid van licht en geluid; radiosignalen gaan met lichtsnelheid (ca. $3\cdot 10^{8}$m/s), maar geluid gaat veel langzamer (ca $340$ m/s). Door beacons tegelijkertijd een radio- en een geluidssignaal uit te laten zenden kan met behulp van het verschil in ontvangsttijden de afstand tussen het beacon en een ontvanger berekend worden. Deze techniek wordt beschreven door Barshan en Ballur~\cite{barshan2000fast}.
+Voor het onderzoek van deze paper is de time of flight (TOF) gebruikt om de afstand tussen beacons en de ontvanger te meten. Deze methode maakt ook gebruik van het verschil in ontvangsttijd van twee signalen. Echter, niet tussen signalen van twee nodes, maar tussen twee types signalen: radio en geluidssignalen.
+
+TOF maakt gebruik van het verschil in propagatiesnelheid van licht en geluid; radiosignalen gaan met lichtsnelheid (ca. $3\cdot 10^{8}$m/s), maar geluid gaat veel langzamer (ca $340$ m/s). Door beacons tegelijkertijd een radio- en een geluidssignaal uit te laten zenden kan met behulp van het verschil in ontvangsttijden de afstand tussen het beacon en een ontvanger berekend worden. Deze techniek wordt beschreven door Barshan en Ballur~\cite{barshan2000fast}.
 
 Figuur~\ref{fig:tijdsdiagram} geeft een voorbeeld van inkomende signalen bij een dergelijke aanpak.
 \begin{figure}[ht!]
@@ -50,11 +63,41 @@ Figuur~\ref{fig:tijdsdiagram} geeft een voorbeeld van inkomende signalen bij een
     \label{fig:tijdsdiagram}
 \end{figure}
 
-\section{Implementatie}
+\section{Implementatie}\label{sec:implementatie}
 De implementatie gebruikt de time of flight (TOF) om de afstand tussen beacons en de ontvanger te meten.
 
+\subsection{Opstelling voor positiebepaling met hoogfrequent geluid}
+De opstelling voor het bepalen van de positie bestaat uit vier bakens, die zijn genummerd van 0 tot 3. Elk baken bestaat uit een Arduino mini met daarop aangesloten een NRF2401L+-radio en een ultrasoon-zender. De bakens zijn bevestigd op een statief. De locaties van de bakens is bekend. Een voorbeeld van een opstelling met de vier bakens en een ontvanger is te zien in afbeelding~\ref{fig:opstelling}.
 
+\begin{figure}[ht!]
+    \centering
+    \includegraphics[width=0.7\textwidth]{opstelling.png}
+    \caption{Opstelling met vier zenders en een ontvanger.}
+    \label{fig:opstelling}
+\end{figure}
 
+De activiteiten van de verschillende bakens zijn als volgt: een van de bakens (Baken 0) verstuurt radioberichten met een interval van 100 ms. Dit bericht bestaat uit een uint8 (een getal tussen 0 en 255) waarin het nummer staat van de baken die aan de beurt is voor het versturen van een geluidspuls. (Baken 0 stuurt ook een bericht als baken 0 zelf aan de beurt is.) Als een baken een bericht ontvangt waarin zijn identiﬁcatienummer staat, verstuurt deze direct hierna een geluidspuls op een frequentie van circa 40kHz en met een duur van 50 ms. De bakens zijn dus nooit tegelijkertijd actief. Figuur~\ref{fig:tijdsdiagram_handleiding} toont de sequentie van activiteiten van de verschillende bakens. Verder zijn in tabel~\ref{table:instellingen} de verschillende instellingen te zien waarop de radio’s onderling communiceren.
+
+\begin{figure}[ht!]
+    \centering
+    \includegraphics[width=0.7\textwidth]{tijdsdiagram_handleiding.png}
+    \caption{Opstelling met vier zenders en een ontvanger.}
+    \label{fig:tijdsdiagram_handleiding}
+\end{figure}
+
+\begin{table}[h]
+    \begin{minipage}{\textwidth}
+        \begin{tabular}{ l l }
+            Kanaal                    & 76 (standaard RF24 instelling) \\
+            Automatisch herverzenden  & Uit               \\
+            Transmissiesnelheid       & 2 Mbps            \\
+            Adres verzendende pipe    & 0xdeadbeefa1LL    \\
+            Payload-grootte           & 1 byte
+        \end{tabular}
+        \caption{Instellingen radio}
+        \label{table:instellingen}        
+    \end{minipage}
+\end{table}
 
 \section{Resultaten en discussie}\label{sec:resultaten}
 ...
@@ -62,13 +105,13 @@ De implementatie gebruikt de time of flight (TOF) om de afstand tussen beacons e
 \section{Conclusie}\label{sec:conclusie}
 ...
 
+\bibliographystyle{plain}
+\bibliography{verslag_week_5}
+
 \newpage
 \appendix
 \section{Bijlage 1 - Code}
 \label{sec:code}
 \input{code_formatted}
-
-\bibliographystyle{plain}
-\bibliography{verslag_week_5}
 
 \end{document}
