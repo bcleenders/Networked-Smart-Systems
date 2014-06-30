@@ -111,6 +111,9 @@ Tijdens de tests is de lijn tussen beacon 1 en 2 als y-as gebruikt, en beacon 0 
 
 \section{Resultaten en discussie}\label{sec:resultaten}
 \todo[inline]{bla}
+Na de implementatie is er gelijk getest of het ook daadwerkelijk functioneerde. In eerste instantie was dit zeker niet het geval, er kwamen allerlei rare waardes binnen. Na verder onderzoek bleek dat dit veroorzaakt werd door een buffer overflow. De Arduino heeft niet zo veel geheugen tot zijn beschikking en aangezien ons algoritme eerst met veel verschillende matrices werkte, koste enorm veel opslagruimte. Hierdoor werd data in de buffer overschreven waardoor er onjuiste waardes ontstonden.
+
+Toen vervolgens het aantal matrices teruggedrongen was naar twee, werkte het beter. Na het nauwkeurig afstellen en finetunen van het algoritme waren de metingen tot ongeveer vijf centimeter nauwkeurig. Veel beter is nauwelijks haalbaar met de gebruikte hardware.
 
 \section{Conclusie}\label{sec:conclusie}
 \todo[inline]{bla}
