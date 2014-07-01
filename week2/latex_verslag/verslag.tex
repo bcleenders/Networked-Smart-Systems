@@ -25,8 +25,12 @@ Met behulp van radiocommunicatie kunnen apparaten, zoals computers, met elkaar c
 
 Een nadeel van draadloze communicatie, is dat er vaak meer last is van storing dan wanneer er een fysieke verbinding (i.e. een kabel) aanwezig is. Doordat de communicatie niet "afgesloten" van de buitenwereld plaats vind, kunnen er externe storingszenders zijn. Voorbeelden van storingen zijn bijvoorbeeld andere agents die communiceren, obstakels die een signaal blokkeren of weerkaatsing van eerder gestuurde berichten.
 
+Dit onderzoek kijkt naar de mogelijkheden van radiocommunicatie via Arduinos en welke rol de configuratie hierbij speelt. Allereerst wordt het onderzoeksdoel aangeduid waarna de methodes om dit doel te onderzoeken worden besproken. Vervolgens worden de resulaten gegeven en toegelicht. Als laatste wordt beschreven wat hieruit geconcludeerd kan worden en of er nog verder onderzoek gedaan kan worden.
+
 \section{Probleemstelling}
-In dit onderzoek wordt gekeken naar verschillende modi waarop radiocommunicatie met Arduino's gedaan kan worden. Het doel is om erachter te komen welke modus het minst last heeft van storing en (dus) de laagste error rate heeft.
+Zoals eerder genoemd, is draadloze communicatie niet altijd even betrouwbaar. Dit wordt veroorzaakt door verschillende factoren, denk hierbij aan de keuze voor het kanaal, de omgeving, de signaalsterkte enzovoorts. In het meest optimale geval zijn er zo min mogelijk van deze belemmerende factoren aanwezig. Door deze factoren mee te nemen kijkt dit onderzoek of er een manier is waardoor draadloze communicatie zo betrouwbaar mogelijk gemaakt kan worden.
+
+In dit onderzoek wordt gekeken naar verschillende modi waarop radiocommunicatie met Arduino's gedaan kan worden. Het doel is om erachter te komen welke modus het minst last heeft van storing en (dus) de laagste packet error rate heeft.
 
 In de tests wordt het effect van drie verschillende factoren onderzocht:
 \begin{itemize}
@@ -35,18 +39,20 @@ In de tests wordt het effect van drie verschillende factoren onderzocht:
     \item Datatransmissiesnelheid
 \end{itemize}
 
+Bij de verschillende tests is gekeken naar het effect van verandering van de output power op de error rate. Hierbij is de hypothese dat een sterker output signaal bij de zender een sterker input signaal bij de ontvanger geeft. Dus, dat een sterker input signaal een lagere error rate geeft.
+
 De tests moeten uitslag geven welke instellingen zorgen voor de beste communicatie.
 
 \section{Methodologie}
-Om "beste" communcatie kwantificeerbaar te maken gebruiken we de error rate. We defini\"eren de error rate als het aantal niet of incorrect ontvangen berichten gedeeld door het aantal verstuurde berichten;
+Om "beste" communcatie kwantificeerbaar te maken gebruiken we de packet error rate. We defini\"eren de error rate als het aantal niet of incorrect ontvangen berichten gedeeld door het aantal verstuurde berichten;
 
 \begin{math}
     \text{error rate} = \frac{\text{niet ontvangen}}{\text{verstuurd}} = 1 - \frac{\text{ontvangen}}{\text{verstuurd}} 
 \end{math}
 
-Voor goede communicatie is het van belang dat deze zo laag mogelijk, idealiter nul, is. In dit onderzoek is de error rate de enige eigenschap waarop we de instellingen beoordelen, en laten we andere factoren zoals bandbreedte of opgenomen vermogen achterwege.
+Voor stabiele communicatie is het van belang dat deze zo laag mogelijk, idealiter nul, is. Dit betekent dat er nauwelijks tot geen packets verloren gaan waardoor stabiele communicatie haalbaar is. In dit onderzoek is de error rate de enige eigenschap waarop we de instellingen beoordelen, en laten we andere factoren zoals bandbreedte of opgenomen vermogen achterwege.
 
-In de testopstelling is gebruik gemaakt van twee Arduino Uno's, de Nordic nrf24l01+ radio en de RF42 library. Tenzij expliciet anders vermeldt gebruiken de radio's frequentiekanaal 0, een transmissionspeed van 250kbps en de hoogste outputpower (0 dBm). De afstand tussen beide radio's is vijf meter en er is sprake van een line of sight (geen blokkerende objecten). De tests zijn uitgevoerd in een ruimte met andere elektrische aparatuur die ook van radiocommunicatie gebruik maakte.
+In de testopstelling is gebruik gemaakt van twee Arduino Uno's, de Nordic nrf24l01+ radio en de RF42 library. Tenzij expliciet anders vermeld, gebruiken de radio's frequentiekanaal 0, een transmissionspeed van 250kbps en de hoogste outputpower (0 dBm). De afstand tussen beide radio's is vijf meter en er is sprake van een line of sight (geen blokkerende objecten). De tests zijn uitgevoerd in een ruimte met andere elektrische aparatuur die ook van radiocommunicatie gebruik maakte.
 
 Tijdens de test zendt een Arduino duizend maal een pakket; wanneer de andere Arduino het pakket ontvangt stuurt deze hem terug. Wanneer het pakket voor de tweede maal ontvangen wordt, telt dat als \'e\'en succesvol ontvangen pakket. Er wordt dus naar een volledige roundtrip gekeken. Beide radio zenders gebruiken telkens dezelfde instellingen, en de timeout tijd is zeer ruim gekozen om dit geen beperking te laten zijn.
 
@@ -56,7 +62,7 @@ De gebruikte code is te zien in Appendix~\ref{sec:code}.
 Deze sectie geeft de resultaten van de uitgevoerde tests en toelichting daarbij. Er zijn drie factoren onderzocht; de outputpower, het frequentiekanaal en de datatransmissiesnelheid.
 
 \subsection{Outputpower}
-In de eerste serie tests is gekeken naar het effect van verandering van de output power op de error rate. Hierbij is de hypothese dat een sterker output signaal bij de zender een sterker input signaal bij de ontvanger geeft. Dus, dat een sterker input signaal een lagere error rate geeft.
+In de resultaten is duidelijk terug te zien dat de eerder genoemde hypothese klopt: een sterker output signaal geeft een lagere error rate. Er is een zeer significant verschil; een toename van factor $64$ in vermogen geeft een error rate die ongeveer een factor $55$ lager is.
 
 \begin{figure}[h!]
     \begin{minipage}{\textwidth}
@@ -78,7 +84,6 @@ In de eerste serie tests is gekeken naar het effect van verandering van de outpu
         \caption{Error rate bij verschillende output sterktes.}
     \end{minipage}
 \end{figure}
-In de resultaten is duidelijk terug te zien dat deze hypothese klopt: een sterker output signaal geeft een lagere error rate. Er is een zeer significant verschil; een toename van factor $64$ in vermogen geeft een error rate die ongeveer een factor $55$ lager is.
 
 \subsection{Datatransmissiesnelheid}
 \begin{figure}[h!]
@@ -100,7 +105,7 @@ In de resultaten is duidelijk terug te zien dat deze hypothese klopt: een sterke
         \caption{Error rate bij verschillende datatransmissie snelheden.}
     \end{minipage}
 \end{figure}
-Hierbij zien we dat de error rate slechts weinig verandert; hoewel het relatieve verschil vrij groot is (factor twee) blijft de error rate erg laag. Afgaande op deze resultaten kunnen we dus stellen dat een lage datatransmissiesnelheid de error rate positief be\"invloed.
+Bij het testen van verschillende datatransmissiesnelheden zien we dat de packet error rate slechts weinig verandert; hoewel het relatieve verschil vrij groot is (factor twee) blijft de error rate erg laag. Afgaande op deze resultaten kunnen we dus stellen dat een lage datatransmissiesnelheid de error rate positief be\"invloed.
 
 Echter, omdat de error rate in alle gevallen erg laag was, raden we aan om eerst uitvoeriger te testen binnen opstellingen die een hogere error rate hebben.
 
@@ -138,11 +143,13 @@ Figuur~\ref{fig:freqkanaal_table} toont een overzicht van de meetresultaten van 
 \end{figure}
 
 \section{Conclusie}
-Uit de tests is gebleken dat de laagste error rate behaald wordt bij een sterk outputsignaal met lage datatransmissiesnelheid, op een frequentiekanaal dat niet door andere zenders gebruikt wordt.
+Draadloze communicatie is niet altijd even betrouwbaar. Dit heeft verschillende oorzaken. Echter, kunnen we deze oorzaken zo'n klein mogelijke invloed geven waardoor draadloze communicatie nagenoeg stabiel plaats kan vinden?
 
-Natuurlijk is voor het opzetten van een sensornetwerk meer nodig dan alleen een lage error rate. Zo kan een hogere datatransmissiesnelheid de voorkeur hebben boven een lage, ookal heeft deze een hogere error rate. Dit omdat de bandbreedte van 2mbps acht keer hoger is dan 500kbps, dus voor grote hoeveelheden data is het energiezuiniger en sneller om op hoge snelheid te zenden.
+Door de configuratie zo optimaal mogelijk te maken is uit de tests is gebleken dat de laagste packet error rate behaald wordt bij een sterk outputsignaal met lage datatransmissiesnelheid, op een frequentiekanaal dat niet door andere zenders gebruikt wordt.
 
-Voor de outputpower geldt hetzelfde; hoewel de error rate lager is, verbruikt de zender ook veel meer stroom (11,3 mA bij 0dBm vs. 7 mA bij -18dBm). Ook hierbij kan dus gekozen worden voor een setting met hogere error rate om stroom te bezuinigen.
+Dus het is wel degelijk mogelijk om draadloze communicatie stabiel te maken door de configuratie op een dusdanige manier aan te passen dat het op de bestemde locatie naar tevredenheid functioneert.
+
+Verder onderzoek zou nog gedaan kunnen worden naar het energieverbuik bij de verschillende instellingen. Bij dit onderzoek is dat achter wegen gelaten. Voor sommige toepassingen, zoals in sensornetwerken, zou laag energieverbruik gewenst kunnen zijn.
 
 \newpage
 \appendix
