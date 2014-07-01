@@ -105,7 +105,7 @@ De activiteiten van de verschillende bakens zijn als volgt: een van de bakens (B
 \subsection{Algoritme}
 Voor het omzetten van de afstanden tussen de ontvanger en de verschillende beacons zijn de berekeningen van Park et al.~\cite{park2011beacon} gebruikt. Doordat de afstanden tot de beacons bekend zijn kan een cirkel worden afgeleid waarop de ontvanger zich bevindt. Doordat meerdere cirkels bekend zijn kan de intersectie van die verschillende cirkels berekend worden: deze intersectie is de locatie van de ontvanger.
 
-Er is gekozen voor deze berekening omdat de locaties van de beacons en de afstanden tot de beacons vrij intuitief als matrices gerepresenteerd worden. Als kanttekening moet vermeld worden dat dit algoritme niet alleen de x en y positie berekent, maar ook de z positie probeert te berekenen. Echter, omdat alle beacons op dezelfde hoogte staan is dit met onze opstelling niet mogelijk geweest. Er is immers niet te achterhalen of de z positie positief of negatief is; doordat alle beacons in een vlak staan kan de zco\"ordinaat gespiegeld worden. Vanwege deze reden hebben we ervoor gekozen om de z-co\"ordinaat niet in de resultaten op te nemen.
+Er is gekozen voor deze berekening omdat de locaties van de beacons en de afstanden tot de beacons vrij intuitief als matrices gerepresenteerd worden. Als kanttekening moet vermeld worden dat dit algoritme niet alleen de x en y positie berekent, maar ook de z positie probeert te berekenen. Echter, omdat alle beacons op dezelfde hoogte staan is dit met onze opstelling niet mogelijk geweest. Er is immers niet te achterhalen of de z positie positief of negatief is; doordat alle beacons in een vlak staan kan de z-co\"ordinaat gespiegeld worden. Vanwege deze reden hebben we ervoor gekozen om de z-co\"ordinaat niet in de resultaten op te nemen.
 
 De gebruikte code is bijgevoegd in appendix~\ref{sec:code}. Merk op dat de posities van de beacons hardcoded is; deze kan worden aangepast indien de beacons een andere configuratie hebben. De positie van de ontvanger is relatief ten opzichte van de beacons.
 
@@ -113,9 +113,9 @@ Tijdens de tests is de lijn tussen beacon 1 en 2 als y-as gebruikt, en beacon 0 
 
 \section{Resultaten en discussie}\label{sec:resultaten}
 \todo[inline]{bla}
-Na de implementatie is er gelijk getest of het ook daadwerkelijk functioneerde. In eerste instantie was dit zeker niet het geval, er kwamen allerlei rare waardes binnen. Na verder onderzoek bleek dat dit veroorzaakt werd door een buffer overflow. De Arduino heeft niet zo veel geheugen tot zijn beschikking en aangezien ons algoritme eerst met veel verschillende matrices werkte, koste enorm veel opslagruimte. Hierdoor werd data in de buffer overschreven waardoor er onjuiste waardes ontstonden.
+De uiteindelijke metingen, waarbij slechts twee matrices in het algoritme gebruikt werden, waren zeer accuraat. De daadwerkelijke positie verschilde vrijwel nooit meer dan vijf centimeter. 
 
-Toen vervolgens het aantal matrices teruggedrongen was naar twee, werkte het beter. Na het nauwkeurig afstellen en finetunen van het algoritme waren de metingen tot ongeveer vijf centimeter nauwkeurig. Veel beter is nauwelijks haalbaar met de gebruikte hardware.
+Echter, wanneer er meer dan twee matrices in het algoritme gebruikt worden, gaat het mis. Aangezien een Arduino maar beperkte opslagruimte heeft, ontstaat er bij het rekenen en opslaan van meerdere (grote) matrices een buffer overflow. Hierdoor worden waardes in het geheugen overgeschreven waardoor de uiteindelijke output van het algoritme niet klopt. Mochten er meerdere matrices nodig zijn voor het berekeken van een positie, dan is dit wel redelijk gemakkelijk op te lossen. Dit kan namelijk door dezelfde matrix te vervangen nadat de benodigde waarde al berekend is. Zo doet het algoritme wat gebruikt is bij dit onderzoek het ook.
 
 \section{Conclusie}\label{sec:conclusie}
 \todo[inline]{bla}
