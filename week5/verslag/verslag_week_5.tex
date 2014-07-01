@@ -34,7 +34,7 @@ Locatiebepaling kan op verschillende manieren gedaan worden, een bekend voorbeel
 Allereerst zullen we een probleemstelling formuleren zodat we een uitgangspunt voor onze tests hebben, dit doen we in sectie~\ref{sec:probleemstelling}. In sectie~\ref{sec:gerelateerd} worden drie mogelijke manieren van afstandbepaling toegelicht. Daarnaast wordt in sectie~\ref{sec:implementatie} de implementatie beschreven. Vervolgens behandelen we in sectie~\ref{sec:resultaten} de resultaten die we door middel van onze tests hebben gekregen. Als laatste trekken we hieruit een conclusie in sectie~\ref{sec:conclusie}.
 
 \section{Probleemstelling}\label{sec:probleemstelling}
-\todo[inline]{bla}
+Het doel van dit onderzoek is het ontwikkelen van een systeem dat positiebepaling op korte afstand kan doen. Met korte afstand wordt een afstand in de orde van 20 meter tot de zenders bedoeld. Hierbij kan gedacht worden aan positiebepaling in een huis of (fabrieks) hal, maar niet aan GPS-achterige applicaties waar wereldwijde of landelijke dekking vereist is.
 
 \section{Gerelateerd werk}\label{sec:gerelateerd}
 Er zijn verschillende manier om met behulp van radio en/of geluidssignalen een afstand te meten, we zullen de volgende drie kort toelichten:
@@ -50,6 +50,8 @@ Bij RSSI wordt de sterkte van het signaal gebruikt om een schatting te maken van
 
 \subsection{Time Difference of Arrival}
 Bij TDOA wordt gebruik gemaakt van het verschil in afstand tussen twee zenders. Als twee zenders tegelijkertijd een signaal uitzenden, kan een ontvanger een mogelijk verschil in ontvangsttijd meten. Dit verschil in ontvangsttijd kan dan omgezet worden naar een verschil in afstand tussen de twee zenders. Deze methode wordt verder uitgewerkt door Gustaffson et al.~\cite{gustafsson2003positioning}.
+
+In dit onderzoek kan TDOA niet worden gebruikt, maar hier is niet voor gekozen omdat het bijhouden van het verschil tussen ontvangsttijden op de ontvanger (in dit geval een Arduino) niet erg nauwkeurig is. Om dit algoritme goed uitvoerbaar te laten zijn dienen eigenlijk de beacons als ontvangers gebruikt worden, en de te positioneren Arduino als zender. Echter, gegeven de opstelling die in dit onderzoek gebruikt wordt kunnen de beacons alleen als zenders gebruikt worden.
 
 \subsection{Time of Flight}
 Voor het onderzoek van deze paper is de time of flight (TOF) gebruikt om de afstand tussen beacons en de ontvanger te meten. Deze methode maakt ook gebruik van het verschil in ontvangsttijd van twee signalen. Echter, niet tussen signalen van twee nodes, maar tussen twee types signalen: radio en geluidssignalen.
