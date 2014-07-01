@@ -25,19 +25,20 @@
 \section{Inleiding}
 Bij het opzetten van sensornetwerken, kan het zijn dat twee nodes niet in elkaars zendbereik vallen. In een dergelijk geval kan een tussenliggende node helpen door berichten door te sturen. Zo kunnen nodes als schakels in een ketting gebruikt worden om een groter bereik mogelijk te maken.
 
-Een dergelijke constructie is een stuk gecompliceerder dan directe communicatie tussen twee nodes, omdat voor betrouwbare communicatie het zenden van ontvangstbevestigingen nodig is.
+Een dergelijke constructie is een stuk gecompliceerder dan directe communicatie tussen twee nodes, omdat voor betrouwbare communicatie het zenden van ontvangstbevestigingen nodig is. Het communiceren binnen een groep nodes is daarom ook geen onderdeel van de standaard meegeleverde libraries. Het doel van dit onderzoek was het mogelijk maken van communicatie via nodes, gebruikmakend van de functionaliteit die wel door Arduino's geleverd wordt.
 
 \section{Probleemstelling}
 Om het probleem overzichtelijk te houden, is het aantal nodes in deze proef beperkt tot drie. Er is een zender, een ontvanger en een doorsturende node. Omdat het aantal nodes beperkt is, is er maar \'e\'en mogelijk pad. Hierdoor kan het pad vooraf vastgelegd worden, dit heet ook wel statische routering.
 
 De uiteindelijke opstelling moet de zender de garantie geven dat een bericht uiteindelijk ontvangen wordt door de ontvanger via de tussenliggende node.
 
-We willen nu weten of het mogelijk is om via een multihopnetwerk betrouwbare end-to-end communicatie te garanderen.
+We willen nu weten of het mogelijk is om via een multihopnetwerk betrouwbare end-to-end communicatie te garanderen. 
+Specifiek verwoord: dit onderzoek heeft als doel om een protocol te ontwikkelen dat de juiste packetvolgorde en de volledigheid (er ontbreken geen packets) garandeert. Van dit protocol wordt tevens een implementatie gegeven.
 
 \section{Protocol}
-Om deze garantie te bieden, kan gebruik worden gemaakt van het alternating bit protocol. Dit protocol stuurt een nummer -een bit- mee met een pakket, wanneer de ontvanger het ontvangt stuurt deze bevestiging met datzelfde nummer terug. Indien de zender een bevestiging met het correcte (laatst verzonden) nummer ontvangt, hoogt deze een counter met een op en stuurt deze het volgende pakket.
+Zoals gezegd is dient het protocol te garanderen dat er geen packets wegvallen tijdens het verzenden en packets de juiste volgorde te behouden. Om dit te garanderen, kan gebruik worden gemaakt van het alternating bit protocol (ABP). Dit protocol stuurt een nummer -een bit- mee met een pakket, wanneer de ontvanger het ontvangt stuurt deze bevestiging met datzelfde nummer terug. Indien de zender een bevestiging met het correcte (laatst verzonden) nummer ontvangt, hoogt deze een counter met een op en stuurt deze het volgende pakket.
 
-Figuur~\ref{fig:flow} illustreert het pad dat een pakket met bijbehorende bevestiging aflegt. Figuur~\ref{fig:roles} toont de verschillende staten waarin een zender/repeater/ontvanger zich kan bevinden en de transities tussen deze staten.
+Figuur~\ref{fig:flow} illustreert het pad dat een pakket met bijbehorende bevestiging aflegt. Figuur~\ref{fig:roles} toont de verschillende staten waarin een zender/herhaler/ontvanger zich kan bevinden en de transities tussen deze staten.
 
 \begin{figure}[ht!]
     \centering
@@ -51,70 +52,70 @@ Figuur~\ref{fig:flow} illustreert het pad dat een pakket met bijbehorende bevest
         \begin{minipage}{0.49\textwidth}
             \centering
             \includegraphics[width=\textwidth]{receiver.png}
-            \caption*{Receiver Arduino}
+            \caption*{Ontvanger Arduino}
         \end{minipage}
         \hfill
         \begin{minipage}{0.49\textwidth}
             \centering
             \includegraphics[width=\textwidth]{repeater.png}
-            \caption*{Repeater Arduino}
+            \caption*{Herhaler Arduino}
         \end{minipage}
         \hfill\centering
         \begin{minipage}{0.8\textwidth}
             \centering
             \includegraphics[width=0.95\textwidth]{sender.png}
-            \caption*{Sender Arduino}
+            \caption*{Zender Arduino}
         \end{minipage}
     \caption{State-diagram Alternating Bit Protocol voor de drie communicerende Arduino's.}
     \label{fig:roles}
     \end{minipage}
 \end{figure}
 
-\section{Methodologie}
+\section{Implementatie}
 Onze implementatie gebruikt niet een enkele bit als identificatie van een pakket, maar een getal. Conceptueel verandert dit niets aan het protocol, maar het biedt wel de mogelijkheid voor later uitbreiding. Zo geldt niet langer de restrictie dat er slechts \'e\'en oud pakket in het netwerk mag zitten. Onze implementatie werkt dus ook als oudere berichten (e.g. tien berichten terug) nog ronddolen in het netwerk.
 
 Tevens stuurt de ontvanger een ACK terug die niet de identificatiecode bevat, maar de negatieve waarde hiervan. Hierdoor is het direct duidelijk of een pakket een bevestiging is (indien de code kleiner dan 0 is), of echte data bevat. Dit helpt om ook in grote netwerken ervoor te zorgen dat een zender niet zijn zelf verzonden bericht als ACK kan lezen.
 
 Verder moet de communcatie op zowel korte als lange afstand betrouwbaar zijn, ook dit moet getest worden.
 
-\section{Resultaten}
+\section{Test methodologie en resultaten}
 De implementatie, waarvan de code is bijgevoegd in appendix~\ref{sec:code}, is in verschillende vormen getest:
 \begin{itemize}
-	\item De zender, repeater en ontvanger allemaal binnen elkaars ontvangstbereik.
-	\item De zender en repeater respectievelijk de repeater en ontvanger binnen ontvangstbereik, maar zender en ontvanger buiten ontvangstbereik.
-	\item Alleen zender en ontvanger binnen ontvangstbereik; repeater buiten bereik.
+	\item De zender, herhaler en ontvanger allemaal binnen elkaars ontvangstbereik.
+	\item De zender en herhaler respectievelijk de herhaler en ontvanger binnen ontvangstbereik, maar zender en ontvanger buiten ontvangstbereik.
+	\item Alleen zender en ontvanger binnen ontvangstbereik; herhaler buiten bereik.
 \end{itemize}
-Omdat er gebruik gemaakt is van statistische routering, is het geen optie voor de zender en ontvanger om direct te communiceren. In de eerste twee gevallen verloopt de communicatie via de repeater; in het derde geval kan geen verbinding worden opgezet omdat de repeater niet bereikbaar is.
+Omdat er gebruik gemaakt is van statistische routering, is het geen optie voor de zender en ontvanger om direct te communiceren. In de eerste twee gevallen verloopt de communicatie via de herhaler; in het derde geval kan geen verbinding worden opgezet omdat de herhaler niet bereikbaar is.
 
 \begin{figure}[ht!]
     \begin{minipage}{\textwidth}
         \begin{minipage}{0.3\textwidth}
             \centering
             \includegraphics[width=0.9\textwidth]{een.jpg}
-            \caption*{Alles bereikbaar}
+            \caption*{Alles direct bereikbaar}
         \end{minipage}
         \hfill
         \begin{minipage}{0.3\textwidth}
             \centering
             \includegraphics[width=0.9\textwidth]{twee.jpg}
-            \caption*{Repeater bereikbaar}
+            \caption*{Ontvanger bereikbaar via herhaler}
         \end{minipage}
         \hfill
         \begin{minipage}{0.3\textwidth}
             \centering
             \includegraphics[width=0.9\textwidth]{drie.jpg}
-            \caption*{Repeater onbereikbaar}
+            \caption*{Herhaler onbereikbaar}
         \end{minipage}
-	\caption{Drie mogelijke scenario's; zwart is de verzender, groen is de repeater en rood is de ontvanger.}
+	\caption{Drie mogelijke scenario's; zwart is de verzender, groen is de herhaler en rood is de ontvanger.}
     \end{minipage}
 \end{figure}
 
-Op zowel korte als lange afstand (tussen sender en receiver zo'n veertig meter) bleken de nodes in staat te zijn nagenoeg alle packets succesvol af te leveren.
+Op zowel korte als lange afstand (tussen zender en ontvanger zo'n veertig meter, overbrugd via herhalers) bleken de nodes in staat te zijn alle packets succesvol af te leveren. Eventueel packet loss wordt door het algoritme gedetecteerd, en de ontbrekende packets worden opnieuw gestuurd totdat deze ontvangen zijn. In deze gevallen werkt het protocol dus zoals gewensd, in het derde geval werkt het protocol niet maar werd dit ook niet verwacht. Immers, dit scenario valt buiten de oorspronkelijke eisen.
 
 \section{Conclusie}
 Concluderend, het is wel degelijk mogelijk om via een multihopnetwerk betrouwbare end-to-end communicatie te garanderen. Bij het uitgevoerde onderzoek zijn de resultaten verassend goed. Over een grote afstand waarbij veel mogelijke obstakels en stoorzenders aanwezig waren, bleken de nodes in staat te zijn nagenoeg alle individuele packets succesvol af te leveren bij de desbetreffende ontvanger.
 
-In gedachten nemend dat een (sensor)netwerk op een veel grotere schaal nog steeds betrouwbaar moet zijn, is het wel verstandig ervoor te zorgen dat er altijd twee andere nodes bereikt kunnen worden. Op deze manier is het veiliger om te zeggen dat een packet altijd bij zijn bestemming aankomt, omdat je er dan rekening mee houdt dat er eventueel een node kapot zou kunnen gaan of uitvalt. Mocht dit gebeuren, dan kan de andere node die binnen bereik is de taak van de kapotte node overnemen.
+In gedachten nemend dat een (sensor)netwerk op een veel grotere schaal nog steeds betrouwbaar moet zijn, is het wel verstandig ervoor te zorgen dat er altijd twee andere nodes bereikt kunnen worden. Op deze manier is het veiliger om te zeggen dat een packet altijd bij zijn bestemming aankomt, omdat je er dan rekening mee houdt dat er eventueel een node kapot zou kunnen gaan of uitvalt. Mocht dit gebeuren, dan kan de andere node die binnen bereik is de taak van de kapotte node overnemen. Dit valt echter buiten de scope van dit onderzoek, en kan in een volgend onderzoek verder uitgewerkt worden.
 
 Verder onderzoek zou gedaan kunnen worden naar het dynamisch maken van het netwerk. Op die manier is het veel gemakkelijker om nodes te verwijderen of toe te voegen in een netwerk en gaat het netwerk dus ook beter om met een node die kapot gaat of uitvalt. Om deze functionaliteit te kunnen bieden moet het protocol nog veel aangepast worden en is het nodig om dynamische routering te implementeren.
 
