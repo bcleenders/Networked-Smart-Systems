@@ -14,6 +14,9 @@
 \usepackage{algorithm}
 \usepackage{algpseudocode}
 \usepackage{algorithmicx}
+\usepackage{color}
+\usepackage{xcolor}
+\usepackage{textcomp}
 
 \DeclareCaptionLabelFormat{andtable}{#1~#2  \&  \tablename~\thetable}
 
@@ -112,13 +115,18 @@ De gebruikte code is bijgevoegd in appendix~\ref{sec:code}. Merk op dat de posit
 Tijdens de tests is de lijn tussen beacon 1 en 2 als y-as gebruikt, en beacon 0 was op de x-as (die onder een hoek van 90 graden de y-as kruist). Het algoritme ondersteunt ook negatieve waardes voor als de ontvanger zich achter de y-as bevindt.
 
 \section{Resultaten en discussie}\label{sec:resultaten}
-\todo[inline]{bla}
-De uiteindelijke metingen, waarbij slechts twee matrices in het algoritme gebruikt werden, waren zeer accuraat. De daadwerkelijke positie verschilde vrijwel nooit meer dan vijf centimeter. 
+Tijdens het onderzoek is een belangrijke beperking van de Arduino als platform: de beperkte hoeveelheid RAM. Wanneer er meer dan twee matrices in het algoritme gebruikt worden, kan dit tot een out of memory error leiden. Deze wordt niet gedetecteerd door de Arduino maar leidt tot het verwijzen naar verkeerde geheugenadressen. Hierdoor worden waardes in het geheugen overgeschreven waardoor de uiteindelijke output van het algoritme niet klopt.
 
-Echter, wanneer er meer dan twee matrices in het algoritme gebruikt worden, gaat het mis. Aangezien een Arduino maar beperkte opslagruimte heeft, ontstaat er bij het rekenen en opslaan van meerdere (grote) matrices een buffer overflow. Hierdoor worden waardes in het geheugen overgeschreven waardoor de uiteindelijke output van het algoritme niet klopt. Mochten er meerdere matrices nodig zijn voor het berekeken van een positie, dan is dit wel redelijk gemakkelijk op te lossen. Dit kan namelijk door dezelfde matrix te vervangen nadat de benodigde waarde al berekend is. Zo doet het algoritme wat gebruikt is bij dit onderzoek het ook.
+Mochten er meerdere matrices nodig zijn voor het berekeken van een positie, dan is dit wel redelijk gemakkelijk op te lossen. Dit kan namelijk door dezelfde matrix te vervangen nadat de benodigde waarde al berekend is. Zo doet het algoritme wat gebruikt is bij dit onderzoek het ook.
+
+De uiteindelijke metingen, waarbij slechts twee matrices in het algoritme gebruikt werden, waren zeer accuraat. De gemeten positie verschilde niet meer dan vijf centimeter ten opzichte van de daadwerkelijke positie.
+
+Bij het implementeren van het algoritme is nog geen rekening gehouden met het stroomverbruik van de Arduino. Voor veel draadloze sensornetwerken is de hoeveelheid beschikbare energie vaak beperkt en kan dit wel een belangrijk aspect van een algoritme zijn. Een volgend onderzoek zou verder kunnen uitlichten hoe hiermee rekening mee kan worden gehouden.
 
 \section{Conclusie}\label{sec:conclusie}
-\todo[inline]{bla}
+We hebben laten zien dat met eenvoudige hardware een accurate positiebepaling gedaan kan worden op de korte afstand. Hierbij is gebruik gemaakt van het Time of Flight principe, wat in een gebied van tientallen vierkante meters een afwijking van minder dan 5 cm heeft.
+
+Voor implementaties waarbij dit stroomverbruik geen rol speelt kan dit algoritme dus gebruikt worden om nauwkeurige metingen te doen. Als stroomverbruik wel belangrijk
 
 \bibliographystyle{plain}
 \bibliography{verslag_week_5}
