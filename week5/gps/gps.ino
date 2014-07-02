@@ -24,10 +24,10 @@ unsigned long timelimit = 50000LL;
 uint8_t activeBeacon;
 
 float pos[4][2] = { // Positions van de beacons; pos[1][1] is de y positie van beacon 1
-    {0.0, 75.0},
-    {72.0, 0.0},
-    {294.0, 0.0},
-    {372.0, 136.0}
+    {100.0, 20.0},
+    {200.0, 0.0},
+    {300.0, 0.0},
+    {400.0, 20.0}
 };
 
 float D[4];
