@@ -8,6 +8,9 @@
 \usepackage[font=small,labelfont=bf]{caption}
 \usepackage{float}
 \usepackage[dutch]{babel}
+\usepackage{color}
+\usepackage{xcolor}
+\usepackage{textcomp}
 
 \DeclareCaptionLabelFormat{andtable}{#1~#2  \&  \tablename~\thetable}
 
@@ -23,7 +26,7 @@
 \section{Inleiding}
 Met behulp van radiocommunicatie kunnen apparaten, zoals computers, met elkaar communiceren zonder een fysieke verbinding daarvoor nodig te hebben. Dit leent zich voor het makkelijk opzetten van (grote) netwerken, omdat de verbindingen zonder planning vooraf kunnen worden opgezet. Bij bijvoorbeeld Smart Dust kunnen de agents na de verspreiding zelf connecties opzetten en hier gebruik van maken.
 
-Een nadeel van draadloze communicatie, is dat er vaak meer last is van storing dan wanneer er een fysieke verbinding (i.e. een kabel) aanwezig is. Doordat de communicatie niet "afgesloten" van de buitenwereld plaats vind, kunnen er externe storingszenders zijn. Voorbeelden van storingen zijn bijvoorbeeld andere agents die communiceren, obstakels die een signaal blokkeren of weerkaatsing van eerder gestuurde berichten.
+Een nadeel van draadloze communicatie, is dat er vaak meer last is van storing dan wanneer er een fysieke verbinding (i.e. een kabel) aanwezig is. Doordat de communicatie niet afgesloten van de buitenwereld plaats vind, kunnen er externe storingszenders zijn. Voorbeelden van storingen zijn bijvoorbeeld andere agents die communiceren, obstakels die een signaal blokkeren of weerkaatsing van eerder gestuurde berichten.
 
 Dit onderzoek kijkt naar de mogelijkheden van radiocommunicatie via Arduinos en welke rol de configuratie hierbij speelt. Allereerst wordt het onderzoeksdoel aangeduid waarna de methodes om dit doel te onderzoeken worden besproken. Vervolgens worden de resulaten gegeven en toegelicht. Als laatste wordt beschreven wat hieruit geconcludeerd kan worden en of er nog verder onderzoek gedaan kan worden.
 
@@ -112,7 +115,9 @@ Echter, omdat de error rate in alle gevallen erg laag was, raden we aan om eerst
 \subsection{Frequentiekanaal}
 Zoals in de introductie al kort genoemd is, kunnen radiozenders elkaar storen omdat ze hetzelfde medium gebruiken. Om dit te voorkomen kunnen zenders verschillende frequenties gebruiken, waardoor ze elkaar niet of minder storen. In de gebruikte testruimte zijn mogelijke stoorzenders onder andere omringende Arduino's en laptops die WiFi gebruiken. Omdat de frequentieband van de Arduino's (2.4 GHz) gedeeld wordt met WiFi, verwachten we dat de frequenties rond WiFi erg veel last hiervan hebben.
 
-De testresultaten ondersteunen deze hypothese: er is duidelijk zichtbaar dat frequenties dicht bij de 2.4 GHz erg veel storing (bijna 25\%) hebben, terwijl frequenties die daar verder vanaf liggen vrijwel geen storing (1.3\% error rate) hebben. Wat verder opvalt, is dat niet alleen het precieze WiFi frequentiekanaal gestoord worden maar de frequentiekanalen ernaast ook. Het is dus zaak om een frequentiekanaal te zoeken dat zo ver mogelijk van gebruikte kanalen af ligt.
+De testresultaten ondersteunen deze hypothese: er is duidelijk zichtbaar dat frequenties dicht bij de 2.4 GHz erg veel storing (bijna 25\%) hebben, terwijl frequenties die daar verder vanaf liggen vrijwel geen storing (1.3\% error rate) hebben. 
+Waarschijnlijk is het WiFi signaal zo sterk dat het het frequentiekanaal en de dicht omliggende kanalen verstoort.
+De metingen zijn meerdere keren uitgevoerd om andere bronnen van storingen zo veel mogelijk uit te sluiten, en alle metingen zijn consistent met wat hier genoemd is: de frequentiekanalen in het midden van de beschikbare band zijn veel storingsgevoeliger dan degenen aan de zijkant van het spectrum.
 
 Figuur~\ref{fig:freqkanaal_table} toont een overzicht van de meetresultaten van de geteste frequentiekanalen.
 
@@ -143,13 +148,13 @@ Figuur~\ref{fig:freqkanaal_table} toont een overzicht van de meetresultaten van 
 \end{figure}
 
 \section{Conclusie}
-Draadloze communicatie is niet altijd even betrouwbaar. Dit heeft verschillende oorzaken. Echter, kunnen we deze oorzaken zo'n klein mogelijke invloed geven waardoor draadloze communicatie nagenoeg stabiel plaats kan vinden?
+Draadloze communicatie is niet altijd even betrouwbaar. De centrale vraag van dit onderzoek was om een beeld te geven van de effecten van verschillende instellingen op de efficientie van communicatie, zowel qua betrouwbaarheid als qua energieverbruik.
 
-Door de configuratie zo optimaal mogelijk te maken is uit de tests is gebleken dat de laagste packet error rate behaald wordt bij een sterk outputsignaal met lage datatransmissiesnelheid, op een frequentiekanaal dat niet door andere zenders gebruikt wordt.
+Uit de tests is gebleken dat de laagste packet error rate behaald wordt bij een sterk outputsignaal met lage datatransmissiesnelheid, op een frequentiekanaal dat niet door andere zenders gebruikt wordt.
 
 Dus het is wel degelijk mogelijk om draadloze communicatie stabiel te maken door de configuratie op een dusdanige manier aan te passen dat het op de bestemde locatie naar tevredenheid functioneert.
 
-Verder onderzoek zou nog gedaan kunnen worden naar het energieverbuik bij de verschillende instellingen. Bij dit onderzoek is dat achter wegen gelaten. Voor sommige toepassingen, zoals in sensornetwerken, zou laag energieverbruik gewenst kunnen zijn.
+Verder onderzoek zou nog gedaan kunnen worden naar het energieverbuik bij de verschillende instellingen. Bij dit onderzoek is dat achterwege gelaten.
 
 \newpage
 \appendix
