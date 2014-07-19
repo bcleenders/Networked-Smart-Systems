@@ -39,14 +39,12 @@ Allereerst zullen we een probleemstelling formuleren zodat we een uitgangspunt v
 
 \section{Probleemstelling}\label{sec:probleemstelling}
 Het doel van dit onderzoek is het ontwikkelen van een systeem dat positiebepaling op korte afstand kan doen. Met korte afstand wordt een afstand in de orde van 20 meter tot de zenders bedoeld. Hierbij kan gedacht worden aan positiebepaling in een huis of (fabrieks) hal, maar niet aan GPS-achterige applicaties waar wereldwijde of landelijke dekking vereist is.
-\todo[inline]{In 1 zin zeggen wat we doen: Kunnen we met de ons gegeven hardware een positioneringssysteem maken dat op 20 cm nauwkeurig is?}
 
 De centrale vraag is deze paper is: kunnen we met de simpele gegeven hardware (verder toegelicht in sectie~\ref{sec:opstelling}) een locatiebepalingssysteem maken dat op tien centimeter nauwkeurig is?
 
 Hierbij is gekozen voor een marge van tien centimeter omdat een Arduino Uno, het gebruikte platform, circa tien centimeter in doorsnee is (75 bij 53 milimeter). Nauwkeurigere positiebepaling zou vereisen dat de positie van de ontvangers op de Arduino een rol speelt en dat de draaiing van de Arduino bekend moet zijn. Dergelijke eisen gaan vallen buiten de scope dit onderzoek.
 
 \section{Gerelateerd werk}\label{sec:gerelateerd}
-\todo[inline]{Toelichten waarom we TOF gekozen hebben.}
 Er zijn verschillende manier om met behulp van radio en/of geluidssignalen een afstand te meten, we zullen de volgende drie kort toelichten:
 \begin{itemize}
     \item Received Signal Strength Indication (RSSI)
@@ -118,7 +116,7 @@ $$B =
         d_c^2 - d_a^2 - x_c^2 + x_a^2 - y_c^2 + y_a^2
     \end{bmatrix}
 $$
-Merk op dat het verschil in z-co\"ordinaten tussen de bakens op $1$ wordt gezet in $A$. Dit is omdat het niet mogelijk is om de multiplicatief inverse ($A^-1$) te berekenen als een kolom $0$ is. De semantiek hierachter, is dat het onmogelijk is om een z-co\"ordinaat te berekenen als alle bakens op dezelfde hoogte staan.
+Merk op dat het verschil in z-co\"ordinaten tussen de bakens op $1$ wordt gezet in $A$. Dit is omdat het niet mogelijk is om de multiplicatief inverse ($A^{-1}$) te berekenen als een kolom $0$ is. De semantiek hierachter, is dat het onmogelijk is om een z-co\"ordinaat te berekenen als alle bakens op dezelfde hoogte staan.
 
 De resulterende vector $P=\begin{bmatrix}x\\y\\z\end{bmatrix}$ representeert de x en y co\"ordinaten. Hierbij is de z co\"ordinaat betekenisloos, omdat we die kunstmatig op 1 hebben gezet.
 
@@ -135,16 +133,16 @@ Zoals gezegd in sectie~\ref{sec:tof} wordt gebruik gemaakt van het verschil in p
 
 Het systeem heeft een vaste grenswaarde om te bepalen of er een geluidssignaal ontvangen wordt: alle input die die waarde overschrijdt, wordt als signaal gezien. De grenswaarde is circa tien maal de maximale waarde van het ontvangen ruis, en hardcoded in het programma gezet. Deze aanpak bleek een betere nauwkeurigheid te geven dan een gemiddelde input sterkte bijhouden en de afwijking ten opzichte daarvan te bepalen, omdat er vrijwel geen ruis is bij 40 kHz en de extra berekeningen benodigd voor het berekenen van een gemiddelde leiden tot een minder nauwkeurige tijdswaarneming.
 
-Het algoritme van Park et al.~\cite{park2011beacon} gebruikt slechts drie bakens om een positie te bepalen. Onze opstelling heeft vier bakens, wat mogelijkheid voor extra nauwkeurigheid biedt. Het systeem voert het algoritme van Park et al. vier maal uit; eenmaal zonder baken 0, eenmaal zonder baken 1, etcetera. Dit levert vier mogelijke locaties op, waarvan vervolgens het gemiddelde wordt berekend. Het idee achter deze aanpak is dat fouten in de metingen elkaar zo uitmiddelen en tot een nauwkeuriger resultaat leiden.
+Het algoritme van Park et al.~\cite{park2011beacon} gebruikt slechts drie bakens om een positie te bepalen. Onze opstelling heeft vier bakens, wat mogelijkheid voor extra nauwkeurigheid biedt. Het systeem voert het algoritme van Park et al. vier maal uit; eenmaal zonder baken 0, eenmaal zonder baken 1, et cetera. Dit levert vier mogelijke locaties op, waarvan vervolgens het gemiddelde wordt berekend. Het idee achter deze aanpak is dat fouten in de metingen elkaar zo uitmiddelen en tot een nauwkeuriger resultaat leiden.
 
 \subsubsection{Glijdend gemiddelde van metingen}
 Om ook meerdere meetrondes elkaars nauwkeurigheid te laten verbeteren, ondersteunt onze implementatie ook de mogelijkheid om een soort glijdend gemiddelde voor de locatie bij te houden. Hierbij heeft de meest recente meting het zwaarste gewicht (e.g. $p$, met $0 \leq p \leq 1$), en alle oude metingen samen $1-p$. Een meting die $n$ meetronden geleden heeft plaatsgevonden, is het gewicht $p^{n}$.
 
 Deze methode is efficient in het geheugengebruik, omdat er slechts \'e\'en variabele bijgehouden hoeft te worden. Wanneer gebruik wordt gemaakt van een glijdend gemiddelde waarbij het gemiddelde van de laatste $m$ metingen gebruikt wordt, moeten $m$ waardes bijgehouden worden. Voor grote waardes van $m$ kan dit problemen opleveren, zeker omdat het gekozen platform (Arduino Uno) slechts een zeer beperkte hoeveelheid RAM heeft.
 
-Om te voorkomen dat \'e\'en verkeerde meting (bijvoorbeeld $(1000,1000)$ waarbij de echte locatie $(5,5)$ is) lang effect heeft, is gekozen voor een methode waarbij metingen die meer dan $25\%$ afwijken van het gemiddelde worden afgezwakt tot de $25\%$ afwijking.
+Om te voorkomen dat \'e\'en uitschieter (bijvoorbeeld $(1000,1000)$ waarbij de echte locatie $(5,5)$ is) een te groot effect heeft, is gekozen voor een methode waarbij metingen die meer dan $25\%$ afwijken van het gemiddelde worden afgezwakt tot de $25\%$ afwijking.
 
-Het nadeel van deze methode is dat bij snel bewegende objecten de locatiebepaling achterloopt op de echte locatie. In dit geval kan de waarde van $p$ hoger gekozen worden: bij een waarde van $p = 1$ wordt alleen nog de laatste meting gebruikt.
+Het nadeel van deze methode is dat bij snel bewegende objecten de locatiebepaling kan achterlopen op de echte locatie. In dit geval kan de waarde van $p$ hoger gekozen worden: bij een waarde van $p = 1$ wordt alleen nog de laatste meting gebruikt.
 
 \section{Tests}\label{sec:tests}
 \subsection{Opstelling en instellingen}\label{sec:opstelling}
@@ -181,25 +179,26 @@ De activiteiten van de verschillende bakens zijn als volgt: een van de bakens (B
 \end{table}
 
 \subsection{Metingen}
-Er zijn in twee verschillende omgevingen metingen gedaan: een gecontroleerde kamer en een buiten locatie.
+Er zijn in twee verschillende omgevingen metingen gedaan: een gecontroleerde kamer en een buiten locatie. Alle metingen gebeurden binnen een afstand van circa acht meter van de zenders, om te voorkomen dat het geluidssignaal te zwak wordt.
 
-In de gecontroleerde kamer was een constante temperatuur, geen wind en geen ruis. Op deze omgeving is het systeem eerst gecalibreerd, altevorens een testmeting te doen. Dezelfde instellingen zijn vervolgens gebruikt bij de buitenlocatie, omdat in echt gebruik een buitenlocatie niet te calibreren is: een calibratie die nu goed is, kan morgen totaal verkeerd zijn.
+In de gecontroleerde kamer was een constante temperatuur, geen wind en geen ruis. Op deze omgeving is het systeem eerst gecalibreerd, altevorens een testmeting te doen. Dezelfde instellingen zijn vervolgens gebruikt bij de buitenlocatie, omdat in echt gebruik een buitenlocatie niet te calibreren is: een calibratie die vandaag geschikt is, kan morgen totaal verkeerd zijn.
 
-Bij de buitenlocatie waren meer mogelijkheden voor meetfouten: een andere temperatuur en windvlagen zorgen ervoor dat de geluidssnelheid ten opzichte van de grond verandert. Bij een hogere temperatuur met wind tegen zal de geluidssnelheid lager zijn dan bij lage temperatuur met wind mee. Omdat de geluidssnelheid wordt gebruikt om de afstand te berekenen, is het van belang dat de gebruikte geluidssnelheid overeenkomt met de werkelijke geluidssnelheid.
+Bij de buitenlocatie waren meer mogelijkheden voor meetfouten: een andere temperatuur en windvlagen zorgen ervoor dat de geluidssnelheid ten opzichte van de grond verandert. Bij een hogere temperatuur met wind mee zal de geluidssnelheid hoger zijn dan bij lage temperatuur met wind tegen. Omdat de geluidssnelheid wordt gebruikt om de afstand te berekenen, is het van belang dat de gebruikte geluidssnelheid overeenkomt met de werkelijke geluidssnelheid (die van veel andere factoren afhangt).
 
 De hypothese hierbij is dat deze gecontroleerde ruimte een betere nauwkeurigheid zal geven dan de buiten locatie.
 
 \section{Resultaten en discussie}\label{sec:resultaten}
-Tijdens het onderzoek is een belangrijke beperking van de Arduino als platform: de beperkte hoeveelheid RAM. Wanneer er meer dan twee matrices in het algoritme gebruikt worden, kan dit tot een out of memory error leiden. Deze wordt niet gedetecteerd door de Arduino maar leidt tot het verwijzen naar verkeerde geheugenadressen. Hierdoor worden waardes in het geheugen overgeschreven waardoor de uiteindelijke output van het algoritme niet klopt.
+Zoals verwacht, was de nauwkeurigheid in de gecontroleerde ruimte het best. Hier was consistent een afwijking van ten hoogste vijf centimeter bij een aantal metingen.
 
-Mochten er meerdere matrices nodig zijn voor het berekeken van een positie, dan is dit wel redelijk gemakkelijk op te lossen. Dit kan namelijk door dezelfde matrix te vervangen nadat de benodigde waarde al berekend is. Zo doet het algoritme wat gebruikt is bij dit onderzoek het ook.
+Bij de locatie in buitenlucht was een grotere afwijking; hier was op drie meetpunten een afwijking tussen de tien en vijftien centimeter. 
 
-De gemeten positie verschilde in een gecontroleerde testruimte niet meer dan vijf centimeter ten opzichte van de daadwerkelijke positie.
-\todo[inline]{Meer uitleg; drie meetpunten op circa tien cm nauwkeurig, \'e\'en grote afwijker, een heel nauwkeurig (5cm) in gecontroleerde omgeving}
+Het vierde meetpunt in buitenlucht had een extreem grote afwijking (in de orde van tientallen meters). We vermoeden dat dit komt doordat dat punt $(0,5)$ op de x-as lag, en het systeem niet om kan gaan met negatieve co\"ordinaten.
 
-... buiten omgeving; goed
+De testresultaten (ook met de uitschieter onbeschouwd gelaten) laten zien dat de afwijking snel toeneemt bij een niet gecalibreerde opstelling. Het verschil in temperatuur kan hier niet de enige oorzaak van zijn: het verschil in geluidssnelheid tussen lucht van 10 graden (circa 363 m/s) en lucht van 40 graden (circa 381 m/s) is slechts 5\%. Het verschil in onnauwkeurigheid is een factor twee tot drie. Het temperatuursverschil is dus niet voldoende om deze afwijking te verklaren. We hebben geen reden kunnen achterhalen die het wel geheel verklaart.
 
-... buiten omgeving; verkeerd bij (0,5)
+Tijdens het onderzoek is tevens nog een belangrijke beperking van de Arduino als platform naar voren gekomen: de beperkte hoeveelheid RAM. Wanneer er meer dan twee matrices in het algoritme gebruikt worden, kan dit tot een out of memory error leiden. Deze wordt niet gedetecteerd door de Arduino maar leidt tot het verwijzen naar verkeerde geheugenadressen. Hierdoor worden waardes in het geheugen overgeschreven waardoor de uiteindelijke output van het algoritme niet klopt. 
+
+Deze beperking heeft als gevolg dat tussentijdse resultaten niet opgeslagen kunnen worden, maar telkens opnieuw berekend moeten worden. Dit leidt tot een kleine hoeveelheid extra overhead, en zou kunnen worden verholpen door een andere Arduino versie met meer RAM te gebruiken.
 
 Bij het implementeren van het algoritme is nog geen rekening gehouden met het stroomverbruik van de Arduino. Voor veel draadloze sensornetwerken is de hoeveelheid beschikbare energie vaak beperkt en kan dit wel een belangrijk aspect van een algoritme zijn. Een volgend onderzoek zou verder kunnen uitlichten hoe hiermee rekening mee kan worden gehouden. Een suggestie hiervoor is het implementeren van een slaapstand wanneer de positie niet veranderd; wanneer een agent stil ligt wordt dan minder energie verbruikt dan wanneer deze beweegt.
 
