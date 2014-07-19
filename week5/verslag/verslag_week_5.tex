@@ -1,6 +1,7 @@
 \documentclass[a4paper,10pt]{article}
 \usepackage[utf8]{inputenc}
 \usepackage{amstext}
+\usepackage{amsmath}
 \usepackage{listings}
 \usepackage{graphicx}
 \usepackage{subfigure}
@@ -40,6 +41,10 @@ Allereerst zullen we een probleemstelling formuleren zodat we een uitgangspunt v
 Het doel van dit onderzoek is het ontwikkelen van een systeem dat positiebepaling op korte afstand kan doen. Met korte afstand wordt een afstand in de orde van 20 meter tot de zenders bedoeld. Hierbij kan gedacht worden aan positiebepaling in een huis of (fabrieks) hal, maar niet aan GPS-achterige applicaties waar wereldwijde of landelijke dekking vereist is.
 \todo[inline]{In 1 zin zeggen wat we doen: Kunnen we met de ons gegeven hardware een positioneringssysteem maken dat op 20 cm nauwkeurig is?}
 
+De centrale vraag is deze paper is: kunnen we met de simpele gegeven hardware (verder toegelicht in sectie~\ref{sec:opstelling}) een locatiebepalingssysteem maken dat op tien centimeter nauwkeurig is?
+
+Hierbij is gekozen voor een marge van tien centimeter omdat een Arduino Uno, het gebruikte platform, circa tien centimeter in doorsnee is (75 bij 53 milimeter). Nauwkeurigere positiebepaling zou vereisen dat de positie van de ontvangers op de Arduino een rol speelt en dat de draaiing van de Arduino bekend moet zijn. Dergelijke eisen gaan vallen buiten de scope dit onderzoek.
+
 \section{Gerelateerd werk}\label{sec:gerelateerd}
 \todo[inline]{Toelichten waarom we TOF gekozen hebben.}
 Er zijn verschillende manier om met behulp van radio en/of geluidssignalen een afstand te meten, we zullen de volgende drie kort toelichten:
@@ -74,8 +79,75 @@ Figuur~\ref{fig:tijdsdiagram} geeft een voorbeeld van inkomende signalen bij een
 \section{Implementatie}\label{sec:implementatie}
 De implementatie gebruikt de time of flight (TOF) om de afstand tussen beacons en de ontvanger te meten.
 
-\subsection{Opstelling voor positiebepaling met hoogfrequent geluid}
-\todo[inline]{Aparte section: testopstelling}
+\subsection{Algoritme} \label{sec:alg}
+Voor het omzetten van de afstanden tussen de ontvanger en de verschillende beacons naar een positie zijn de berekeningen van Park et al.~\cite{park2011beacon} gebruikt. Zoals gezegd wordt een lichtelijk aangepast versie gebruikt, omdat de z-co\"ordinaten niet gebruikt worden.
+
+Gegeven drie bakens a, b en c op de posities $(x_a, y_a, z_a)$, $(x_b, y_b, z_b)$ en $(x_c, y_c, z_c)$ en de de afstanden tussen de ontvanger en de bakens $d_a$, $d_b$ en $d_c$, kan de positie $P$ als volgt berekend worden:
+$$P = 
+    \begin{bmatrix}
+        x\\
+        y\\
+        z
+    \end{bmatrix}
+    = A^{-1}B
+$$
+Waarbij:
+$$A = 2 \cdot
+    \begin{bmatrix}
+        x_b - x_a & y_b - y_a & z_b - z_a \\
+        x_c - x_b & y_c - y_b & z_c - z_b \\
+        x_a - x_c & y_a - y_c & z_a - z_c
+    \end{bmatrix}
+    = 2 \cdot
+    \begin{bmatrix}
+        x_b - x_a & y_b - y_a & 1 \\
+        x_c - x_b & y_c - y_b & 1 \\
+        x_a - x_c & y_a - y_c & 1
+    \end{bmatrix}
+$$
+$$B = 
+    \begin{bmatrix}
+        d_a^2 - d_b^2 - x_a^2 + x_b^2 - y_a^2 + y_b^2 - z_a^2 + z_b^2 \\
+        d_b^2 - d_c^2 - x_b^2 + x_c^2 - y_b^2 + y_c^2 - z_b^2 + z_c^2 \\
+        d_c^2 - d_a^2 - x_c^2 + x_a^2 - y_c^2 + y_a^2 - z_c^2 + z_a^2
+    \end{bmatrix}
+    =
+    \begin{bmatrix}
+        d_a^2 - d_b^2 - x_a^2 + x_b^2 - y_a^2 + y_b^2 \\
+        d_b^2 - d_c^2 - x_b^2 + x_c^2 - y_b^2 + y_c^2 \\
+        d_c^2 - d_a^2 - x_c^2 + x_a^2 - y_c^2 + y_a^2
+    \end{bmatrix}
+$$
+Merk op dat het verschil in z-co\"ordinaten tussen de bakens op $1$ wordt gezet in $A$. Dit is omdat het niet mogelijk is om de multiplicatief inverse ($A^-1$) te berekenen als een kolom $0$ is. De semantiek hierachter, is dat het onmogelijk is om een z-co\"ordinaat te berekenen als alle bakens op dezelfde hoogte staan.
+
+De resulterende vector $P=\begin{bmatrix}x\\y\\z\end{bmatrix}$ representeert de x en y co\"ordinaten. Hierbij is de z co\"ordinaat betekenisloos, omdat we die kunstmatig op 1 hebben gezet.
+
+Er is gekozen voor deze berekening omdat de locaties van de beacons en de afstanden tot de beacons vrij intuitief als matrices gerepresenteerd worden. Als kanttekening moet vermeld worden dat dit algoritme niet alleen de x en y positie berekent, maar ook de z positie probeert te berekenen. Echter, omdat alle beacons op dezelfde hoogte staan is dit met onze opstelling niet mogelijk geweest. Er is immers niet te achterhalen of de z positie positief of negatief is; doordat alle beacons in een vlak staan kan de z-co\"ordinaat gespiegeld worden. Vanwege deze reden hebben we ervoor gekozen om de z-co\"ordinaat niet in de resultaten op te nemen. Deze aanpak biedt wel de mogelijkheid om -gegeven een andere opstelling van de zenders- ook de z-co\"ordinaat te bepalen.
+
+De code die dit algoritme implementeert voor de Arduino Uno is bijgevoegd in appendix~\ref{sec:code}. Merk op dat de posities van de beacons hardcoded is; deze kan worden aangepast indien de beacons een andere configuratie hebben.
+
+Tijdens de tests is de lijn tussen beacon 1 en 2 als y-as gebruikt, en beacon 0 was op de x-as (die onder een hoek van 90 graden de y-as kruist). Het algoritme ondersteunt ook negatieve waardes voor als de ontvanger zich achter de y-as bevindt.
+
+\subsection{Toelichting software implementatie}
+In deze sectie wordt toegelicht hoe het abstracte algotime uit sectie~\ref{sec:tof} en \ref{sec:alg} ge\"implementeerd is.
+
+Zoals gezegd in sectie~\ref{sec:tof} wordt gebruik gemaakt van het verschil in propagatiesnelheid van radiogolven (lichtsnelheid) en geluid (ca 340 m/s) om de afstand tot een baken te bepalen. In onze implementatie wordt eerst gewacht tot er een radiosignaal ontvangen is en de ontvangsttijd wordt genoteerd. Vervolgens wordt gewacht tot het bijbehorende (en tegelijkertijd verzonden) geluidssignaal ontvangen is, en de tijd daarvan wordt genoteerd.
+
+Het systeem heeft een vaste grenswaarde om te bepalen of er een geluidssignaal ontvangen wordt: alle input die die waarde overschrijdt, wordt als signaal gezien. De grenswaarde is circa tien maal de maximale waarde van het ontvangen ruis, en hardcoded in het programma gezet. Deze aanpak bleek een betere nauwkeurigheid te geven dan een gemiddelde input sterkte bijhouden en de afwijking ten opzichte daarvan te bepalen, omdat er vrijwel geen ruis is bij 40 kHz en de extra berekeningen benodigd voor het berekenen van een gemiddelde leiden tot een minder nauwkeurige tijdswaarneming.
+
+Het algoritme van Park et al.~\cite{park2011beacon} gebruikt slechts drie bakens om een positie te bepalen. Onze opstelling heeft vier bakens, wat mogelijkheid voor extra nauwkeurigheid biedt. Het systeem voert het algoritme van Park et al. vier maal uit; eenmaal zonder baken 0, eenmaal zonder baken 1, etcetera. Dit levert vier mogelijke locaties op, waarvan vervolgens het gemiddelde wordt berekend. Het idee achter deze aanpak is dat fouten in de metingen elkaar zo uitmiddelen en tot een nauwkeuriger resultaat leiden.
+
+\subsubsection{Glijdend gemiddelde van metingen}
+Om ook meerdere meetrondes elkaars nauwkeurigheid te laten verbeteren, ondersteunt onze implementatie ook de mogelijkheid om een soort glijdend gemiddelde voor de locatie bij te houden. Hierbij heeft de meest recente meting het zwaarste gewicht (e.g. $p$, met $0 \leq p \leq 1$), en alle oude metingen samen $1-p$. Een meting die $n$ meetronden geleden heeft plaatsgevonden, is het gewicht $p^{n}$.
+
+Deze methode is efficient in het geheugengebruik, omdat er slechts \'e\'en variabele bijgehouden hoeft te worden. Wanneer gebruik wordt gemaakt van een glijdend gemiddelde waarbij het gemiddelde van de laatste $m$ metingen gebruikt wordt, moeten $m$ waardes bijgehouden worden. Voor grote waardes van $m$ kan dit problemen opleveren, zeker omdat het gekozen platform (Arduino Uno) slechts een zeer beperkte hoeveelheid RAM heeft.
+
+Om te voorkomen dat \'e\'en verkeerde meting (bijvoorbeeld $(1000,1000)$ waarbij de echte locatie $(5,5)$ is) lang effect heeft, is gekozen voor een methode waarbij metingen die meer dan $25\%$ afwijken van het gemiddelde worden afgezwakt tot de $25\%$ afwijking.
+
+Het nadeel van deze methode is dat bij snel bewegende objecten de locatiebepaling achterloopt op de echte locatie. In dit geval kan de waarde van $p$ hoger gekozen worden: bij een waarde van $p = 1$ wordt alleen nog de laatste meting gebruikt.
+
+\section{Tests}\label{sec:tests}
+\subsection{Opstelling en instellingen}\label{sec:opstelling}
 De opstelling voor het bepalen van de positie bestaat uit vier bakens, die zijn genummerd van 0 tot 3. Elk baken bestaat uit een Arduino mini met daarop aangesloten een NRF2401L+-radio en een ultrasoon-zender. De bakens zijn bevestigd op een statief. De locaties van de bakens is bekend. Een voorbeeld van een opstelling met de vier bakens en een ontvanger is te zien in afbeelding~\ref{fig:opstelling}.
 
 \begin{figure}[ht!]
@@ -108,52 +180,34 @@ De activiteiten van de verschillende bakens zijn als volgt: een van de bakens (B
     \end{minipage}
 \end{table}
 
-\subsection{Algoritme} \label{sec:alg}
-Voor het omzetten van de afstanden tussen de ontvanger en de verschillende beacons naar een positie zijn de berekeningen van Park et al.~\cite{park2011beacon} gebruikt. \todo[inline]{Berekeningen kort uitleggen: wat doen we precies? (matrices laten zien)}Doordat de afstanden tot de beacons bekend zijn kan een cirkel worden afgeleid waarop de ontvanger zich bevindt. Doordat meerdere cirkels bekend zijn kan de intersectie van die verschillende cirkels berekend worden: deze intersectie is de locatie van de ontvanger.
+\subsection{Metingen}
+Er zijn in twee verschillende omgevingen metingen gedaan: een gecontroleerde kamer en een buiten locatie.
 
-Er is gekozen voor deze berekening omdat de locaties van de beacons en de afstanden tot de beacons vrij intuitief als matrices gerepresenteerd worden. Als kanttekening moet vermeld worden dat dit algoritme niet alleen de x en y positie berekent, maar ook de z positie probeert te berekenen. Echter, omdat alle beacons op dezelfde hoogte staan is dit met onze opstelling niet mogelijk geweest. Er is immers niet te achterhalen of de z positie positief of negatief is; doordat alle beacons in een vlak staan kan de z-co\"ordinaat gespiegeld worden. Vanwege deze reden hebben we ervoor gekozen om de z-co\"ordinaat niet in de resultaten op te nemen.
+In de gecontroleerde kamer was een constante temperatuur, geen wind en geen ruis. Op deze omgeving is het systeem eerst gecalibreerd, altevorens een testmeting te doen. Dezelfde instellingen zijn vervolgens gebruikt bij de buitenlocatie, omdat in echt gebruik een buitenlocatie niet te calibreren is: een calibratie die nu goed is, kan morgen totaal verkeerd zijn.
 
-De gebruikte code is bijgevoegd in appendix~\ref{sec:code}. Merk op dat de posities van de beacons hardcoded is; deze kan worden aangepast indien de beacons een andere configuratie hebben. De positie van de ontvanger is relatief ten opzichte van de beacons.
+Bij de buitenlocatie waren meer mogelijkheden voor meetfouten: een andere temperatuur en windvlagen zorgen ervoor dat de geluidssnelheid ten opzichte van de grond verandert. Bij een hogere temperatuur met wind tegen zal de geluidssnelheid lager zijn dan bij lage temperatuur met wind mee. Omdat de geluidssnelheid wordt gebruikt om de afstand te berekenen, is het van belang dat de gebruikte geluidssnelheid overeenkomt met de werkelijke geluidssnelheid.
 
-Tijdens de tests is de lijn tussen beacon 1 en 2 als y-as gebruikt, en beacon 0 was op de x-as (die onder een hoek van 90 graden de y-as kruist). Het algoritme ondersteunt ook negatieve waardes voor als de ontvanger zich achter de y-as bevindt.
-
-\subsection{Toelichting software implementatie}
-In deze sectie wordt toegelicht hoe het abstracte algotime uit sectie~\ref{sec:tof} en \ref{sec:alg} ge\"implementeerd is.
-
-Zoals gezegd in sectie~\ref{sec:tof} wordt gebruik gemaakt van het verschil in propagatiesnelheid van radiogolven (lichtsnelheid) en geluid (ca 340 m/s) om de afstand tot een baken te bepalen. In onze implementatie wordt eerst gewacht tot er een radiosignaal ontvangen is en de ontvangsttijd wordt genoteerd. Vervolgens wordt gewacht tot het bijbehorende (en tegelijkertijd verzonden) geluidssignaal ontvangen is, en de tijd daarvan wordt genoteerd.
-
-Het systeem heeft een vaste grenswaarde om te bepalen of er een geluidssignaal ontvangen wordt: alle input die die waarde overschrijdt, wordt als signaal gezien. De grenswaarde is circa tien maal de maximale waarde van het ontvangen ruis, en hardcoded in het programma gezet. Deze aanpak bleek een betere nauwkeurigheid te geven dan een gemiddelde input sterkte bijhouden en de afwijking ten opzichte daarvan te bepalen, omdat er vrijwel geen ruis is bij 40 kHz en de extra berekeningen benodigd voor het berekenen van een gemiddelde leiden tot een minder nauwkeurige tijdswaarneming.
-
-Het algoritme van Park et al.~\cite{park2011beacon} gebruikt slechts drie bakens om een positie te bepalen. Onze opstelling heeft vier bakens, wat mogelijkheid voor extra nauwkeurigheid biedt. Het systeem voert het algoritme van Park et al. vier maal uit; eenmaal zonder baken 0, eenmaal zonder baken 1, etcetera. Dit levert vier mogelijke locaties op, waarvan vervolgens het gemiddelde wordt berekend. Het idee achter deze aanpak is dat fouten in de metingen elkaar zo uitmiddelen en tot een nauwkeuriger resultaat leiden.
-
-\subsubsection{Glijdend gemiddelde van metingen}
-Om ook meerdere meetrondes elkaars nauwkeurigheid te laten verbeteren, ondersteunt onze implementatie ook de mogelijkheid om een soort glijdend gemiddelde voor de locatie bij te houden. Hierbij heeft de meest recente meting het zwaarste gewicht (e.g. $p$, met $0 \leq p \leq 1$), en alle oude metingen samen $1-p$. Een meting die $n$ meetronden geleden heeft plaatsgevonden, is het gewicht $p^{n}$.
-
-Deze methode is efficient in het geheugengebruik, omdat er slechts \'e\'en variabele bijgehouden hoeft te worden. Wanneer gebruik wordt gemaakt van een glijdend gemiddelde waarbij het gemiddelde van de laatste $m$ metingen gebruikt wordt, moeten $m$ waardes bijgehouden worden. Voor grote waardes van $m$ kan dit problemen opleveren, zeker omdat het gekozen platform (Arduino Uno) slechts een zeer beperkte hoeveelheid RAM heeft.
-
-Om te voorkomen dat \'e\'en verkeerde meting (bijvoorbeeld $(1000,1000)$ waarbij de echte locatie $(5,5)$ is) lang effect heeft, is gekozen voor een methode waarbij metingen die meer dan $25\%$ afwijken van het gemiddelde worden afgezwakt tot de $25\%$ afwijking.
-
-Het nadeel van deze methode is dat bij snel bewegende objecten de locatiebepaling achterloopt op de echte locatie. In dit geval kan de waarde van $p$ hoger gekozen worden: bij een waarde van $p = 1$ wordt alleen nog de laatste meting gebruikt.
+De hypothese hierbij is dat deze gecontroleerde ruimte een betere nauwkeurigheid zal geven dan de buiten locatie.
 
 \section{Resultaten en discussie}\label{sec:resultaten}
 Tijdens het onderzoek is een belangrijke beperking van de Arduino als platform: de beperkte hoeveelheid RAM. Wanneer er meer dan twee matrices in het algoritme gebruikt worden, kan dit tot een out of memory error leiden. Deze wordt niet gedetecteerd door de Arduino maar leidt tot het verwijzen naar verkeerde geheugenadressen. Hierdoor worden waardes in het geheugen overgeschreven waardoor de uiteindelijke output van het algoritme niet klopt.
 
 Mochten er meerdere matrices nodig zijn voor het berekeken van een positie, dan is dit wel redelijk gemakkelijk op te lossen. Dit kan namelijk door dezelfde matrix te vervangen nadat de benodigde waarde al berekend is. Zo doet het algoritme wat gebruikt is bij dit onderzoek het ook.
 
-De uiteindelijke metingen, waarbij slechts twee matrices in het algoritme gebruikt werden, waren zeer accuraat. De gemeten positie verschilde in een gecontroleerde testruimte niet meer dan vijf centimeter ten opzichte van de daadwerkelijke positie.
+De gemeten positie verschilde in een gecontroleerde testruimte niet meer dan vijf centimeter ten opzichte van de daadwerkelijke positie.
 \todo[inline]{Meer uitleg; drie meetpunten op circa tien cm nauwkeurig, \'e\'en grote afwijker, een heel nauwkeurig (5cm) in gecontroleerde omgeving}
 
-Hierbij moet worden opgemerkt dat de opstelling geoptimaliseerd was voor deze ruimte met constante temperatuur, weinig ruis en geen wind.
+... buiten omgeving; goed
 
-Bij het implementeren van het algoritme is nog geen rekening gehouden met het stroomverbruik van de Arduino. Voor veel draadloze sensornetwerken is de hoeveelheid beschikbare energie vaak beperkt en kan dit wel een belangrijk aspect van een algoritme zijn. Een volgend onderzoek zou verder kunnen uitlichten hoe hiermee rekening mee kan worden gehouden.
+... buiten omgeving; verkeerd bij (0,5)
+
+Bij het implementeren van het algoritme is nog geen rekening gehouden met het stroomverbruik van de Arduino. Voor veel draadloze sensornetwerken is de hoeveelheid beschikbare energie vaak beperkt en kan dit wel een belangrijk aspect van een algoritme zijn. Een volgend onderzoek zou verder kunnen uitlichten hoe hiermee rekening mee kan worden gehouden. Een suggestie hiervoor is het implementeren van een slaapstand wanneer de positie niet veranderd; wanneer een agent stil ligt wordt dan minder energie verbruikt dan wanneer deze beweegt.
 
 \section{Conclusie}\label{sec:conclusie}
 We hebben laten zien dat met eenvoudige hardware een accurate positiebepaling gedaan kan worden op de korte afstand. Hierbij is gebruik gemaakt van het Time of Flight principe, wat in een gebied van tientallen vierkante meters een afwijking van minder dan 5 cm heeft.
 
-Voor implementaties waarbij dit stroomverbruik geen rol speelt kan dit algoritme dus gebruikt worden om nauwkeurige metingen te doen. Als stroomverbruik wel belangrijk is, is het mogelijk om bijvoorbeeld minder meetrondes te doen; bijvoorbeeld niet constant, maar om de seconde.
-
-\todo[inline]{Stroomverbruik is natuurlijk belangrijk wanneer we in het veld werken!}
-
+Voor implementaties waarbij dit stroomverbruik geen rol speelt kan dit algoritme dus gebruikt worden om nauwkeurige metingen te doen. Als stroomverbruik wel belangrijk is, is het mogelijk om bijvoorbeeld minder meetrondes te doen; bijvoorbeeld niet constant, maar om de seconde. Voor agents die verspreid zijn over een oppervlak (zoals bij brand detectie) is vaak geen stroombron beschikbaar: deze moeten dus op batterijen of accu's werken, wat het energieverbruik een belangrijke factor maakt. Hiernaar kan verder onderzoek gedaan worden: hoe kan locatiebepaling energiezuinig gebeuren?
+    
 \bibliographystyle{plain}
 \bibliography{verslag_week_5}
 
